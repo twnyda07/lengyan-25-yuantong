@@ -234,7 +234,7 @@ function buildMail_(req) {
   const repeat = req.times > 1
     ? '<p style="margin:0 0 16px;padding:10px 14px;border:1px solid rgba(63,107,74,.4);'
       + 'background:rgba(63,107,74,.07);border-radius:3px;color:#3f6b4a;line-height:1.85">'
-      + '此為第 <b>' + req.times + '</b> 次觀照。掌相與前次相近，判為同一人，故仍得此門——'
+      + '此為第 <b>' + req.times + '</b> 次觀照，仍得此門——'
       + '同門再現，非是巧合，正可添幾分信心，依之用功。</p>'
     : '';
 
@@ -242,12 +242,22 @@ function buildMail_(req) {
     return '<div style="font-size:13px;letter-spacing:.22em;color:#9a7b3f;font-weight:bold;'
       + 'margin:26px 0 8px;padding-bottom:6px;border-bottom:1px solid #ddd2ba">' + t + '</div>';
   };
-  const three = function (k, label, color, txt) {
+  const COLOR = { jiao: '#33405e', fude: '#9a7b3f', chan: '#3f6b4a' };
+  const three = function (k) {
+    const b = PRACTICE_BASE[k];
+    const items = b.items.map(function (t) {
+      return '<div style="padding-left:16px;text-indent:-16px;margin-bottom:4px;line-height:1.9">'
+        + '☐&nbsp;' + esc_(t.replace('{ep}', y.talk.ep)) + '</div>';
+    }).join('');
     return '<table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:9px;border:1px solid #ddd2ba;border-radius:3px">'
-      + '<tr><td style="width:64px;vertical-align:top;padding:12px 10px">'
-      +   '<div style="background:' + color + ';color:#fff;text-align:center;font-weight:bold;'
-      +   'font-size:14px;letter-spacing:.14em;border-radius:2px;padding:4px 0">' + label + '</div></td>'
-      + '<td style="padding:12px 14px 12px 0;line-height:1.9;color:#241f18">' + esc_(txt) + '</td></tr></table>';
+      + '<tr><td style="width:66px;vertical-align:top;padding:12px 10px">'
+      +   '<div style="background:' + COLOR[k] + ';color:#fff;text-align:center;font-weight:bold;'
+      +   'font-size:14px;letter-spacing:.12em;border-radius:2px;padding:5px 0">' + b.label
+      +   '<div style="font-size:10.5px;font-weight:normal;opacity:.85">' + b.note + '</div></div></td>'
+      + '<td style="padding:12px 14px 12px 0;color:#241f18">' + items
+      +   '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #ddd2ba;color:#5d5648;'
+      +     'font-size:15px;line-height:1.9"><b style="color:#9a7b3f">本門別行　</b>'
+      +     esc_(y.practice[k]) + '</div></td></tr></table>';
   };
 
   const html =
@@ -349,7 +359,7 @@ function buildMail_(req) {
         return '  ' + PALM_META[k].label + '：' + (req.feats[k] >= 50 ? PALM_META[k].hi : PALM_META[k].lo);
       }).join('\n')
     + '\n\n【所請之圓通】第 ' + y.n + ' 門　' + y.name + '　' + y.gate + '（' + y.seal + '）\n'
-    + (req.times > 1 ? '  ※ 第 ' + req.times + ' 次觀照，掌相與前次相近，仍得此門。\n' : '')
+    + (req.times > 1 ? '  ※ 第 ' + req.times + ' 次觀照，仍得此門。\n' : '')
     + '\n【經文．聖者自陳】\n' + y.sutra
     + '\n（CBETA 大正藏 T0945．卷' + (y.n === 25 ? '六' : '五') + '）\n'
     + '\n【其人其事】\n' + y.story + '\n'
