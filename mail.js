@@ -8,7 +8,7 @@
    MAIL_API 留空時，整個寄送區塊不會出現，網站其餘功能照常。
    ========================================================================== */
 
-const MAIL_API = "";   /* ← 部署 Apps Script 後，把「網頁應用程式網址」貼在此處 */
+const MAIL_API = "https://script.google.com/macros/s/AKfycbzbw0CVcqsMvbX5VYsO-seqZFgvRrC68sXVBB1Vs2b3niQafzr2o07JgXZM_gx04OJI-g/exec";
 
 const BaoyanMail = (function(){
   const LS_KEY = "baoyan_yuantong_contact";
