@@ -604,7 +604,7 @@ function analyzePalm(canvas){
 function show(f){
   feats = f;
 
-  /* 前次紀錄：同一台機器、掌相相近、且相隔不久 → 判為同一人，仍出同一門 */
+  /* 前次紀錄：同一台機器、掌相相近、且相隔不久 → 仍出同一門 */
   let prev = null;
   try{ prev = JSON.parse(localStorage.getItem(LS) || "null"); }catch(_){}
   const same = prev && prev.dev === deviceId() && prev.feats
