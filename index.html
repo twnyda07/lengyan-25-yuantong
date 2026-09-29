@@ -4,15 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>楞嚴二十五圓通．掌紋觀照 — 寶嚴禪寺</title>
-<meta name="description" content="《大佛頂首楞嚴經》二十五圓通線上導覽：觀照自己的掌紋掌相，找到與你相應的修行法門，並附經文原文與文殊菩薩揀選偈。">
+<meta name="description" content="《大佛頂首楞嚴經》二十五圓通線上導覽：先端詳自己的掌相八觀，再請一門相應的圓通法門，附經文原文、文殊菩薩揀選偈、教理福德禪定三學功課，與見輝法師《秒懂楞嚴》對應開示。">
 <style>
   :root{
     --paper:#f2ece0; --paper2:#fbf8f1; --paper3:#e9e1d1;
     --ink:#241f18; --ink2:#5d5648; --ink3:#8b8271;
     --line:#cbbca0; --line2:#ddd2ba;
     --gold:#9a7b3f; --gold2:#b8965a;
-    --indigo:#33405e; --seal:#8f3c2c;
-    --dark:#1b1913;
+    --indigo:#33405e; --seal:#8f3c2c; --jade:#3f6b4a;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -27,7 +26,6 @@
   }
   .wrap{max-width:720px; margin:0 auto;}
 
-  /* ── 頁首 ── */
   header{text-align:center; padding:40px 0 8px;}
   .temple{font-size:14px; letter-spacing:.6em; text-indent:.6em; color:var(--gold); margin-bottom:18px;}
   h1{font-size:31px; font-weight:700; letter-spacing:.08em; line-height:1.45;}
@@ -36,10 +34,9 @@
   .rule{width:64px; height:1px; background:var(--line); margin:22px auto; position:relative;}
   .rule::before{content:"❖"; position:absolute; top:-13px; left:50%; transform:translateX(-50%);
     background:var(--paper); padding:0 9px; color:var(--gold); font-size:12px;}
-  .lead{color:var(--ink2); font-size:16px; text-align:left; max-width:560px; margin:0 auto;}
+  .lead{color:var(--ink2); font-size:16px; text-align:left; max-width:566px; margin:0 auto;}
   .lead b{color:var(--ink); font-weight:700;}
 
-  /* ── 區塊 ── */
   section{margin-top:40px;}
   .card{background:var(--paper2); border:1px solid var(--line2); border-radius:4px;
     box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 6px 20px rgba(120,100,70,.09); padding:26px 24px;}
@@ -47,7 +44,6 @@
     padding-bottom:12px; border-bottom:1px solid var(--line2); margin-bottom:20px; text-align:center;}
   h2 em{font-style:normal; color:var(--gold);}
 
-  /* ── 按鈕 ── */
   .btn{appearance:none; font-family:inherit; cursor:pointer; font-size:17px; letter-spacing:.16em;
     text-indent:.16em; padding:14px 30px; border-radius:3px; border:1px solid var(--ink);
     background:var(--ink); color:var(--paper2); transition:.15s; font-weight:700;}
@@ -55,51 +51,18 @@
   .btn:active{transform:translateY(1px);}
   .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
   .btn.ghost:hover{background:var(--paper3);}
-  .btn[disabled]{opacity:.4; cursor:default;}
   .btn.sm{font-size:15px; padding:10px 20px;}
   .row{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;}
 
-  /* ── 模式選擇 ── */
-  .modes{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  .mode{background:var(--paper2); border:1px solid var(--line2); border-radius:4px; padding:22px 18px;
-    text-align:center; cursor:pointer; transition:.15s;}
-  .mode:hover{border-color:var(--gold); background:#fff;}
-  .mode.on{border-color:var(--gold); background:#fff; box-shadow:0 0 0 1px var(--gold) inset;}
-  .mode .ic{font-size:30px; line-height:1;}
-  .mode .t{font-size:18px; font-weight:700; letter-spacing:.14em; margin:12px 0 6px;}
-  .mode .d{font-size:14px; color:var(--ink2); line-height:1.75;}
-  .mode .tag{display:inline-block; font-size:12px; letter-spacing:.1em; color:var(--gold);
-    border:1px solid var(--line); border-radius:20px; padding:1px 10px; margin-top:9px;}
-  @media(max-width:560px){ .modes{grid-template-columns:1fr;} }
-
-  /* ── 掌圖 ── */
+  /* 掌圖 */
   .palmfig{display:block; margin:0 auto; max-width:300px; width:100%;}
   .palmfig .out{fill:#fff; stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round;}
   .palmfig .ln{fill:none; stroke-width:2.4; stroke-linecap:round;}
   .palmfig .lbl{font-size:11px; fill:var(--ink2); font-family:inherit; letter-spacing:.06em;}
-  .palmfig .tick{stroke:var(--line); stroke-width:1; stroke-dasharray:2 3;}
   .legend{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:13.5px; color:var(--ink2);}
   .legend i{display:inline-block; width:22px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px;}
 
-  /* ── 掃描器 ── */
-  .viewer{position:relative; width:100%; aspect-ratio:3/4; max-width:330px; margin:0 auto;
-    background:var(--dark); border:1px solid var(--line); border-radius:4px; overflow:hidden;}
-  .viewer video, .viewer canvas.shot{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none;}
-  .viewer.cam video{display:block;} .viewer.shot canvas.shot{display:block;}
-  .viewer .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    color:#9a917c; font-size:14.5px; text-align:center; padding:26px; line-height:2;}
-  .viewer.cam .ph, .viewer.shot .ph{display:none;}
-  .guide{position:absolute; inset:0; pointer-events:none; opacity:.42;}
-  .guide svg{width:100%; height:100%;}
-  .scanbar{position:absolute; left:0; right:0; height:2px; display:none;
-    background:linear-gradient(90deg,transparent,#e8d7a8,transparent); box-shadow:0 0 14px #e8d7a8;}
-  .viewer.busy .scanbar{display:block; animation:scan 1.5s ease-in-out infinite;}
-  @keyframes scan{0%,100%{top:8%;}50%{top:92%;}}
-  .tip{text-align:center; color:var(--ink2); font-size:14.5px; margin-top:14px; min-height:24px;}
-  .tip.busy{animation:bl 1.4s infinite;} @keyframes bl{50%{opacity:.35;}}
-  .err{color:var(--seal); font-size:14.5px; text-align:center; margin-top:10px;}
-
-  /* ── 六問 ── */
+  /* 八問 */
   .qstep{font-size:13px; letter-spacing:.24em; color:var(--gold); text-align:center; margin-bottom:6px;}
   .qtext{font-size:19px; font-weight:700; line-height:1.75; text-align:center;}
   .qhint{font-size:14px; color:var(--ink3); text-align:center; margin-top:8px;}
@@ -111,23 +74,29 @@
   .prog{height:3px; background:var(--paper3); border-radius:2px; margin-top:22px; overflow:hidden;}
   .prog i{display:block; height:100%; background:var(--gold); transition:width .3s;}
 
-  /* ── 結果 ── */
   #result{display:none;}
   #result.show{display:block; animation:fade .5s ease;}
   @keyframes fade{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
 
+  /* 八觀 */
   .bars{display:grid; gap:11px;}
   .b{display:grid; grid-template-columns:78px 1fr; gap:12px; align-items:start;}
   .b .bn{font-size:14.5px; letter-spacing:.1em; color:var(--ink2); text-align:right; line-height:1; margin-top:-1px;}
-  .b .bt{position:relative;}
   .b .bg{height:9px; background:var(--paper3); border-radius:5px; overflow:hidden;}
   .b .bg i{display:block; height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); border-radius:5px;}
   .b .bv{font-size:13px; color:var(--ink3); margin-top:3px;}
   .traits{margin-top:20px; padding-top:18px; border-top:1px dashed var(--line2);}
   .traits p{font-size:15.5px; line-height:1.95; color:var(--ink2); margin-bottom:9px;}
   .traits p b{color:var(--ink);}
+  .traits .all{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line2);
+    font-size:14.5px; color:var(--ink3); line-height:1.9;}
 
-  .hit{text-align:center; padding:4px 0 2px;}
+  /* 抽門 */
+  .draw{text-align:center; padding:6px 0 2px;}
+  .draw .lot{font-size:13px; letter-spacing:.3em; text-indent:.3em; color:var(--gold); margin-bottom:6px;}
+  .again-note{display:inline-block; font-size:13.5px; line-height:1.8; color:var(--jade);
+    border:1px solid rgba(63,107,74,.4); background:rgba(63,107,74,.07);
+    border-radius:3px; padding:8px 16px; margin-bottom:16px;}
   .hit .cat{display:inline-block; font-size:13px; letter-spacing:.24em; text-indent:.24em;
     color:var(--paper2); background:var(--indigo); padding:4px 16px; border-radius:2px;}
   .hit .ic{font-size:42px; line-height:1; margin:18px 0 6px;}
@@ -150,15 +119,31 @@
   .manju .v{font-size:17px; line-height:2.1; letter-spacing:.08em; color:var(--indigo); font-weight:700;}
   .manju .n{font-size:15px; line-height:1.95; color:var(--ink2); margin-top:11px;
     padding-top:11px; border-top:1px dashed var(--line2);}
-  .steps{counter-reset:s; display:flex; flex-direction:column; gap:12px;}
-  .steps li{list-style:none; display:grid; grid-template-columns:28px 1fr; gap:12px;
-    font-size:16px; line-height:1.95;}
-  .steps li::before{counter-increment:s; content:counter(s); width:26px; height:26px; margin-top:4px;
-    border:1px solid var(--gold); border-radius:50%; color:var(--gold); font-size:13px;
-    display:flex; align-items:center; justify-content:center;}
+
+  /* 三學 */
+  .three{display:grid; gap:11px;}
+  .tx{background:#fff; border:1px solid var(--line2); border-radius:3px; padding:14px 16px;
+    display:grid; grid-template-columns:62px 1fr; gap:14px; align-items:start;}
+  .tx .k{font-size:15px; font-weight:700; letter-spacing:.16em; text-align:center;
+    border-radius:2px; padding:5px 0; color:#fff;}
+  .tx.j .k{background:var(--indigo);} .tx.f .k{background:var(--gold);} .tx.c .k{background:var(--jade);}
+  .tx .v{font-size:16px; line-height:1.95;}
+  .three-note{font-size:13.5px; color:var(--ink3); margin-top:10px; line-height:1.85;}
+
   .daily{background:var(--indigo); color:#f0ece2; border-radius:3px; padding:16px 20px;
     font-size:16.5px; line-height:1.95;}
   .daily .t{font-size:12.5px; letter-spacing:.3em; color:#c3b795; margin-bottom:6px;}
+
+  .talk a{display:flex; gap:12px; align-items:flex-start; text-decoration:none;
+    background:#fff; border:1px solid var(--line2); border-radius:3px; padding:14px 16px;
+    color:var(--ink); transition:.12s;}
+  .talk a:hover{border-color:var(--seal); background:#fffdfb;}
+  .talk .yt{flex:0 0 auto; width:30px; height:21px; background:#c00; border-radius:5px;
+    position:relative; margin-top:5px;}
+  .talk .yt::after{content:""; position:absolute; top:5px; left:11px;
+    border-left:10px solid #fff; border-top:5.5px solid transparent; border-bottom:5.5px solid transparent;}
+  .talk .tt{font-size:15px; line-height:1.75;}
+  .talk .by{font-size:12.5px; color:var(--ink3); margin-top:4px; letter-spacing:.06em;}
 
   .also{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;}
   .also a{display:block; background:var(--paper2); border:1px solid var(--line2); border-radius:3px;
@@ -169,7 +154,6 @@
   .also .g{font-size:14px; color:var(--gold); margin-top:3px;}
   @media(max-width:560px){ .also{grid-template-columns:1fr;} }
 
-  /* ── 耳根歸趣 ── */
   .ear{background:linear-gradient(180deg,#fffdf7,#f6f0e2); border:1px solid var(--gold);
     border-radius:4px; padding:26px 24px; margin-top:34px; text-align:center;}
   .ear .ttl{font-size:13px; letter-spacing:.3em; text-indent:.3em; color:var(--gold);}
@@ -178,24 +162,38 @@
     text-indent:.24em; color:var(--indigo); font-weight:700;}
   .ear .ex{font-size:15.5px; color:var(--ink2); line-height:2; margin-top:16px; text-align:left;}
 
-  /* ── 二十五圓通總覽 ── */
+  /* 寄送 */
+  .mailbox{margin-top:34px; background:var(--paper2); border:1px solid var(--line);
+    border-radius:4px; padding:24px 22px; text-align:center;}
+  .mailbox-h{font-size:14px; letter-spacing:.3em; text-indent:.3em; color:var(--gold); font-weight:700;}
+  .mailbox-p{font-size:15px; line-height:1.95; color:var(--ink2); margin-top:10px;}
+  .mailbox-f{margin:16px auto 0; max-width:400px; display:flex; flex-direction:column; gap:10px;}
+  .mailbox-f input{font-family:inherit; font-size:16px; color:var(--ink); background:#fff;
+    border:1px solid var(--line); border-radius:3px; padding:12px 14px; outline:none; width:100%;}
+  .mailbox-f input:focus{border-color:var(--gold); box-shadow:0 0 0 2px rgba(154,123,63,.14);}
+  .mailbox-agree{display:flex; gap:9px; align-items:flex-start; text-align:left;
+    font-size:13.5px; line-height:1.75; color:var(--ink2);}
+  .mailbox-agree input{width:16px; height:16px; margin-top:4px; flex:0 0 auto; accent-color:var(--gold);}
+  .mailbox-msg{min-height:22px; margin-top:12px; font-size:14.5px; line-height:1.8;}
+  .mailbox-msg.ok{color:var(--jade);} .mailbox-msg.bad{color:var(--seal);}
+  .mailbox-note{font-size:12.5px; line-height:1.8; color:var(--ink3); margin-top:12px;}
+  .mailbox.done .mailbox-f{display:none;}
+
+  /* 全覽 */
   .grp{margin-top:26px;}
-  .grp-h{font-size:14px; letter-spacing:.3em; text-indent:.3em; color:var(--gold); font-weight:700;
-    margin-bottom:10px;}
+  .grp-h{font-size:14px; letter-spacing:.3em; text-indent:.3em; color:var(--gold); font-weight:700; margin-bottom:10px;}
   details{background:var(--paper2); border:1px solid var(--line2); border-radius:3px; margin-bottom:8px;}
   details[open]{background:#fff; border-color:var(--line);}
-  summary{cursor:pointer; padding:13px 16px; list-style:none; display:flex; align-items:center; gap:12px;
-    font-size:16.5px;}
+  summary{cursor:pointer; padding:13px 16px; list-style:none; display:flex; align-items:center; gap:12px; font-size:16.5px;}
   summary::-webkit-details-marker{display:none;}
   summary .no{font-size:12.5px; color:var(--ink3); min-width:26px;}
   summary .ic{font-size:19px;}
   summary .nm{font-weight:700;}
   summary .gt{margin-left:auto; font-size:14px; color:var(--gold); white-space:nowrap;}
-  .dbody{padding:4px 18px 20px; border-top:1px dashed var(--line2); margin:0 0 0;}
+  .dbody{padding:4px 18px 20px; border-top:1px dashed var(--line2);}
   .dbody .sutra{font-size:15.5px; line-height:2.05; margin-top:14px;}
-  .dbody .plain{font-size:15.5px;}
+  .dbody .plain, .dbody .tx .v{font-size:15.5px;}
   .dbody .manju .v{font-size:16px;}
-  .dbody .steps li{font-size:15.5px;}
   @media(max-width:520px){ summary{flex-wrap:wrap;} summary .gt{margin-left:38px; width:100%;} }
 
   footer{margin-top:52px; padding-top:24px; border-top:1px solid var(--line2);
@@ -206,8 +204,9 @@
   .disc b{color:var(--ink);}
   @media(max-width:480px){
     body{font-size:16.5px;} h1{font-size:25px;} .hit .nm{font-size:23px;} .ear .vs{font-size:17px;}
+    .tx{grid-template-columns:52px 1fr; gap:11px;}
   }
-  @media print{ .modes,.row,.btn,.viewer,#stage{display:none !important;} body{background:#fff;} }
+  @media print{ #stage,.row,.btn,.mailbox{display:none !important;} body{background:#fff;} }
 </style>
 </head>
 <body>
@@ -216,39 +215,28 @@
 <header>
   <div class="temple">寶 嚴 禪 寺</div>
   <h1>楞嚴二十五圓通．掌紋觀照
-    <small>觀 掌 中 紋 ． 尋 相 應 門</small>
+    <small>先 觀 己 掌 ． 後 請 一 門</small>
   </h1>
   <div class="rule"></div>
   <p class="lead">
-    《大佛頂首楞嚴經》卷五、卷六，二十五位聖者各自說出他們證道的那一道門：
-    有人從<b>聽聲音</b>入、有人從<b>聞香</b>入、有人從<b>呼吸</b>入、有人從<b>一句佛號</b>入。
-    佛陀說——<b>「歸元性無二，方便有多門。」</b>回家的路只有一條，門卻有很多扇。
-    這裡用你掌中的紋路作一面鏡子，照照看：哪一扇門，離你最近。
+    《大佛頂首楞嚴經》卷五、卷六，二十五位聖者各自說出自己證道的那一道門：
+    有從<b>聽聲音</b>入者，有從<b>聞香</b>入者，有從<b>呼吸</b>入者，亦有從<b>一句佛號</b>入者。
+    世尊曰——<b>「歸元性無二，方便有多門。」</b>還家之路唯是一條，而門有多扇。<br><br>
+    此處分作兩事：先端詳自己的手掌，認得<b>掌相八觀</b>，知其性情之所偏；
+    再虔心請出<b>一門圓通</b>，作為這一段日子用功的所依。
   </p>
 </header>
 
-<!-- ───── 選擇方式 ───── -->
+<!-- ───── 八問 ───── -->
 <section id="stage">
   <div class="card">
-    <h2>第 一 步 ． <em>取</em> 掌 相</h2>
+    <h2>第 一 事 ． <em>觀</em> 己 之 掌</h2>
+    <p style="text-align:center; color:var(--ink2); font-size:15.5px; margin-top:-6px;">
+      請攤開<b>慣用的那一隻手</b>，對著光，依下列八問自己端詳。<br>
+      八問所答，只用來為您說明自己的手相特色，不作吉凶之斷。
+    </p>
 
-    <div class="modes">
-      <div class="mode" data-m="quiz">
-        <div class="ic">🔍</div>
-        <div class="t">自己端詳</div>
-        <div class="d">攤開手掌，依八個問題自己看、自己答，<br>一問只看一處。最準確，也最像一次靜心。</div>
-        <div class="tag">約 3 分鐘 ・ 推薦</div>
-      </div>
-      <div class="mode" data-m="scan">
-        <div class="ic">📷</div>
-        <div class="t">拍掌掃描</div>
-        <div class="d">用手機鏡頭拍手掌，或上傳一張掌心照片，由程式概略取相。</div>
-        <div class="tag">約 30 秒 ・ 趣味</div>
-      </div>
-    </div>
-
-    <!-- 掌紋圖解 -->
-    <div style="margin-top:26px; padding-top:22px; border-top:1px dashed var(--line2);">
+    <div style="margin-top:22px; padding-top:20px; border-top:1px dashed var(--line2);">
       <div class="blk-h">掌 紋 圖 解 ． 先 認 得 這 四 條 線</div>
       <svg class="palmfig" viewBox="0 0 210 285" aria-label="手掌掌紋圖解">
         <g class="out">
@@ -259,17 +247,12 @@
           <rect x="135" y="72" width="19" height="50" rx="9"/>
           <rect x="37" y="150" width="21" height="72" rx="10" transform="rotate(25 47 155)"/>
         </g>
-        <!-- 掌丘：淡色區塊示意（金星丘在生命線內側，月丘在小指側掌緣） -->
         <path d="M60,158 C60,198 62,226 74,240 L104,240 C86,216 73,190 65,156 Z" fill="rgba(154,123,63,.11)"/>
         <ellipse cx="133" cy="212" rx="17" ry="21" fill="rgba(51,64,94,.09)"/>
-        <!-- 四條主線 -->
         <path class="ln" style="stroke:#8f3c2c" d="M63,146 C88,124 118,120 146,130"/>
         <path class="ln" style="stroke:#33405e" d="M61,158 C88,156 114,170 137,182"/>
         <path class="ln" style="stroke:#3f6b4a" d="M65,154 C73,190 86,218 104,240"/>
         <path class="ln" style="stroke:#9a7b3f; stroke-dasharray:5 4" d="M116,240 C114,206 112,174 110,146"/>
-        <!-- 標示 -->
-        <path class="tick" d="M146,130 L156,124"/>
-        <path class="tick" d="M137,182 L150,186"/>
         <text class="lbl" x="158" y="122">感情線</text>
         <text class="lbl" x="152" y="190">智慧線</text>
         <text class="lbl" x="52"  y="260">生命線</text>
@@ -283,54 +266,18 @@
         <span><i style="background:#3f6b4a"></i>生命線</span>
         <span><i style="background:#9a7b3f"></i>事業線</span>
       </div>
-      <p style="font-size:14.5px; color:var(--ink2); margin-top:14px; text-align:center;">
-        請用<b>慣用的那一隻手</b>。手相所說的是習性與傾向，不是命定；<br>《楞嚴經》講的正是：<b>「知見立知即無明本」</b>——看見習性，就已經開始鬆動它了。
-      </p>
     </div>
+
+    <div class="row"><button class="btn" id="startBtn">開 始 端 詳</button></div>
   </div>
 
-  <!-- 六問 -->
   <div class="card" id="quizBox" style="display:none; margin-top:20px;">
     <div class="qstep" id="qStep"></div>
     <div class="qtext" id="qText"></div>
     <div class="qhint" id="qHint"></div>
     <div class="opts" id="qOpts"></div>
     <div class="prog"><i id="qProg" style="width:0"></i></div>
-    <div class="row"><button class="btn ghost sm" id="qBack">← 上一題</button></div>
-  </div>
-
-  <!-- 掃描 -->
-  <div class="card" id="scanBox" style="display:none; margin-top:20px;">
-    <div class="viewer" id="viewer">
-      <video id="video" playsinline muted autoplay></video>
-      <canvas class="shot" id="shot"></canvas>
-      <div class="ph">攤開手掌，掌心朝向鏡頭<br>讓手掌填滿畫面、光線充足</div>
-      <div class="guide">
-        <svg viewBox="0 0 210 285" preserveAspectRatio="xMidYMid meet">
-          <g fill="none" stroke="#e8d7a8" stroke-width="1.6" stroke-dasharray="6 5">
-            <rect x="52" y="112" width="102" height="130" rx="27"/>
-            <rect x="60" y="48" width="21" height="72" rx="10"/>
-            <rect x="85" y="34" width="21" height="86" rx="10"/>
-            <rect x="110" y="44" width="21" height="76" rx="10"/>
-            <rect x="135" y="72" width="19" height="50" rx="9"/>
-            <rect x="37" y="150" width="21" height="72" rx="10" transform="rotate(25 47 155)"/>
-          </g>
-        </svg>
-      </div>
-      <div class="scanbar"></div>
-    </div>
-    <div class="tip" id="scanTip">請選擇下方任一方式取像</div>
-    <div class="err" id="scanErr"></div>
-    <div class="row">
-      <button class="btn ghost sm" id="camBtn">開啟鏡頭</button>
-      <button class="btn ghost sm" id="upBtn">上傳掌心照片</button>
-      <button class="btn sm" id="readBtn" disabled>開 始 觀 照</button>
-    </div>
-    <input type="file" id="file" accept="image/*" style="display:none">
-    <p style="font-size:13.5px; color:var(--ink3); margin-top:16px; text-align:center; line-height:1.9;">
-      影像只在你的手機／電腦上運算，<b>不會上傳、不會儲存</b>。<br>
-      掃描是依影像明暗與紋理概略取相，僅供趣味；要更貼近實際，請改用「自己端詳」。
-    </p>
+    <div class="row"><button class="btn ghost sm" id="qBack">← 上一問</button></div>
   </div>
 </section>
 
@@ -338,28 +285,32 @@
 <section id="result">
 
   <div class="card">
-    <h2>第 二 步 ． <em>掌</em> 相 八 觀</h2>
+    <h2>您 的 <em>掌 相 八 觀</em></h2>
     <div class="bars" id="bars"></div>
     <div class="traits" id="traits"></div>
   </div>
 
   <div class="card" style="margin-top:20px;">
-    <h2>第 三 步 ． 與 你 <em>相 應</em> 的 圓 通</h2>
-    <div class="hit" id="hit"></div>
+    <h2>所 <em>請</em> 之 圓 通</h2>
+    <div class="draw">
+      <div id="repeatNote"></div>
+      <div class="lot">二 十 五 門 之 中</div>
+      <div class="hit" id="hit"></div>
+    </div>
 
     <div class="blk">
       <div class="blk-h">經 文 ． 聖 者 自 陳</div>
       <div class="sutra" id="rSutra"></div>
-      <div class="src">《大佛頂如來密因修證了義諸菩薩萬行首楞嚴經》・CBETA 大正藏 T0945</div>
+      <div class="src" id="rSrc"></div>
     </div>
 
     <div class="blk">
-      <div class="blk-h">這 是 一 個 什 麼 樣 的 人</div>
+      <div class="blk-h">其 人 其 事</div>
       <div class="plain" id="rStory"></div>
     </div>
 
     <div class="blk">
-      <div class="blk-h">你 的 掌 紋 何 以 相 應</div>
+      <div class="blk-h">與 此 門 相 契 的 掌 相</div>
       <div class="plain" id="rPalm"></div>
     </div>
 
@@ -369,21 +320,29 @@
     </div>
 
     <div class="blk">
-      <div class="blk-h">今 天 就 能 開 始 的 修 法</div>
-      <ol class="steps" id="rSteps"></ol>
+      <div class="blk-h">三 學 功 課 ． 教 理 ． 福 德 ． 禪 定</div>
+      <div class="three" id="rThree"></div>
+      <p class="three-note">三者並行，不可偏廢：教理明其所以然，福德厚其資糧，禪定得其受用。闕一則久而生偏。</p>
     </div>
 
     <div class="blk">
-      <div class="daily"><div class="t">帶 著 走 的 一 句</div><div id="rDaily"></div></div>
+      <div class="daily"><div class="t">日 用 寄 語</div><div id="rDaily"></div></div>
+    </div>
+
+    <div class="blk talk">
+      <div class="blk-h">見 輝 法 師 開 示</div>
+      <div id="rTalk"></div>
     </div>
 
     <div class="blk">
-      <div class="blk-h">同 時 相 應 的 另 外 兩 門</div>
+      <div class="blk-h">旁 通 二 門</div>
       <div class="also" id="rAlso"></div>
     </div>
   </div>
 
   <div class="ear" id="earBox"></div>
+
+  <div class="mailbox" id="mailBox"></div>
 
   <div class="row" style="margin-top:28px;">
     <button class="btn ghost" id="againBtn">再 觀 照 一 次</button>
@@ -391,7 +350,7 @@
   </div>
 </section>
 
-<!-- ───── 二十五圓通總覽 ───── -->
+<!-- ───── 全覽 ───── -->
 <section>
   <h2 style="border:none; margin-bottom:6px;">二 十 五 <em>圓</em> 通 ． 全 覽</h2>
   <p style="text-align:center; color:var(--ink2); font-size:15px; margin-bottom:22px;">
@@ -403,58 +362,64 @@
 <div class="disc">
   <b>關於這個網站</b><br>
   一、<b>經文原文</b>（聖者自陳、文殊菩薩揀選偈）逐字錄自 CBETA 中華電子佛典協會《大正新脩大藏經》第 19 冊 No. 945，未作改動。<br>
-  二、<b>白話說明與修持建議</b>為寶嚴禪寺依古德註疏所作的方便語，並非經文，請讀者分辨。<br>
-  三、<b>掌相部分</b>取民間手相的通俗說法，作為認識自己習性的方便與接引，<b>不是命理預測，也不涉吉凶禍福</b>。佛法不許為人卜相以謀利養；此處只借掌紋作一面鏡子，照見習氣、選擇法門。<br>
-  四、相由心生，亦隨心轉。二十五門<b>實無優劣</b>——經云「歸元性無二，方便有多門」；文殊菩薩為娑婆眾生獨選耳根一門，是就當機而說，不是貶餘二十四門。
+  二、<b>見輝法師開示連結</b>為《秒懂楞嚴》對應集數，標題逐字引自官方影片標題，不加修飾。<br>
+  三、<b>白話說明與三學功課</b>為寶嚴禪寺依古德註疏所作的方便語，並非經文，請讀者分辨。<br>
+  四、<b>掌相八觀</b>取民間手相的通俗說法，僅用於為您說明自己手掌的特色，<b>不是命理預測，也不涉吉凶禍福</b>；所請之圓通亦非由掌相推算而得，而是於二十五門中虔心請出一門。佛法不許為人卜相以謀利養，此處只借掌紋作一面鏡子，照見習氣、依門用功。<br>
+  五、二十五門<b>實無優劣</b>——經云「歸元性無二，方便有多門」；文殊菩薩為娑婆眾生獨選耳根一門，是就當機而說，非貶餘二十四門。
 </div>
 
 <footer>
   <b>寶嚴山寶嚴禪寺</b>　Baoyan Chan Monastery<br>
   經文出處：CBETA 大正藏 T0945《大佛頂首楞嚴經》卷五、卷六<br>
+  開示出處：見輝法師《秒懂楞嚴》（見輝法師閱藏居）<br>
   © 寶嚴禪寺．願以此功德，普及於一切
 </footer>
 
 </div>
 
 <script src="yuantong-data.js"></script>
+<script src="mail.js"></script>
 <script>
-/* ===================== 共用 ===================== */
 const $ = id => document.getElementById(id);
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-let feats = null;   // {form,head,heart,life,fate,mount,density,finger} 0~100
+const LS = "baoyan_yuantong_v1";
+let feats = null, picked = null, repeatN = 1;
 
-/* ---- 評分：掌相八觀 → 二十五圓通（以 L2 正規化取相似度，各門立足點相同） ---- */
-function rank(f){
-  const list = WEIGHTS.map((w,i)=>{
-    let dot = 0, n2 = 0;
-    for(const k of PALM_KEYS){
-      const wk = w[k] || 0;
-      dot += wk * ((f[k] - 50) / 50);
-      n2  += wk * wk;
-    }
-    const cos = n2 ? dot / Math.sqrt(n2) : 0;
-    // 平手時的穩定微調：同一份掌相永遠得到同一個結果
-    const jitter = ((Math.sin((i+1)*12.9898 + f.head*0.017 + f.heart*0.023 + f.density*0.031) * 43758.5453) % 1) * 0.02;
-    return {i, s: cos + jitter};
-  });
-  list.sort((a,b)=> b.s - a.s);
-  return list;
+/* ─────────── 本機識別：同一台機器（同一瀏覽器）給一個固定識別碼 ─────────── */
+function deviceId(){
+  let v = null;
+  try{ v = localStorage.getItem("baoyan_dev"); }catch(_){}
+  if(!v){
+    v = "d" + Math.random().toString(36).slice(2,12) + Date.now().toString(36);
+    try{ localStorage.setItem("baoyan_dev", v); }catch(_){}
+  }
+  return v;
 }
 
-/* ===================== 模式選擇 ===================== */
-document.querySelectorAll(".mode").forEach(el=>{
-  el.addEventListener("click", ()=>{
-    document.querySelectorAll(".mode").forEach(m=>m.classList.remove("on"));
-    el.classList.add("on");
-    const m = el.dataset.m;
-    $("quizBox").style.display = m==="quiz" ? "block" : "none";
-    $("scanBox").style.display = m==="scan" ? "block" : "none";
-    if(m==="quiz"){ qi = 0; ans = []; renderQ(); }
-    (m==="quiz" ? $("quizBox") : $("scanBox")).scrollIntoView({behavior:"smooth", block:"start"});
-  });
-});
+/* ─────────── 以「掌相＋本機」為種子抽門 ───────────
+   同一台機器、同一副掌相，所抽必是同一門；
+   掌相以十分位取整，故微幅差異仍歸為同一人，重抽仍得同門，作為印證。 */
+function hash32(s){
+  let h = 2166136261 >>> 0;
+  for(let i=0; i<s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h >>> 0;
+}
+function seedOf(f){
+  return hash32(PALM_KEYS.map(k => Math.round(f[k]/10)).join("-") + "|" + deviceId());
+}
+/* 由種子產生不重複的三門：第一門為所請之門，其餘二門為旁通 */
+function drawDoors(f){
+  let s = seedOf(f);
+  const next = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+  const bag = YUANTONG.map((_,i)=>i);
+  for(let i=bag.length-1; i>0; i--){ const j = Math.floor(next()*(i+1)); const t=bag[i]; bag[i]=bag[j]; bag[j]=t; }
+  return bag.slice(0,3);
+}
+function palmDist(a,b){
+  let s=0; for(const k of PALM_KEYS) s += Math.abs(a[k]-b[k]);
+  return s / PALM_KEYS.length;
+}
 
-/* ===================== 六問 ===================== */
+/* ─────────── 八問 ─────────── */
 let qi = 0, ans = [];
 function renderQ(){
   const q = QUIZ[qi];
@@ -467,215 +432,69 @@ function renderQ(){
   q.opts.forEach((o, k)=>{
     const b = document.createElement("button");
     b.className = "opt"; b.type = "button"; b.textContent = o.t;
-    b.addEventListener("click", ()=>{ ans[qi] = k; qi++; qi < QUIZ.length ? renderQ() : finishQuiz(); });
+    b.addEventListener("click", ()=>{ ans[qi] = k; qi++; qi < QUIZ.length ? renderQ() : finish(); });
     box.appendChild(b);
   });
 }
 $("qBack").addEventListener("click", ()=>{ if(qi>0){ qi--; renderQ(); } });
+$("startBtn").addEventListener("click", ()=>{
+  qi = 0; ans = [];
+  $("quizBox").style.display = "block"; renderQ();
+  $("quizBox").scrollIntoView({behavior:"smooth", block:"start"});
+});
 
-function finishQuiz(){
+function finish(){
   const f = {};
-  PALM_KEYS.forEach(k=>{ f[k] = 50; });          // 未作答者取中值
+  PALM_KEYS.forEach(k=>{ f[k] = 50; });
   QUIZ.forEach((q, i)=>{ f[q.key] = q.opts[ans[i]].v; });
   show(f);
 }
 
-/* ===================== 掃描 ===================== */
-let stream = null, mode = "";
-const viewer = $("viewer"), video = $("video"), shot = $("shot");
-
-$("camBtn").addEventListener("click", async ()=>{
-  $("scanErr").textContent = "";
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    $("scanErr").textContent = "此瀏覽器不支援鏡頭，請改用「上傳掌心照片」。"; return;
-  }
-  try{
-    try{ stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}, audio:false}); }
-    catch(e){ stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false}); }
-    video.srcObject = stream; await video.play();
-    viewer.className = "viewer cam"; mode = "cam";
-    $("scanTip").textContent = "手掌攤平、掌心朝鏡頭，對準框線後按「開始觀照」";
-    $("readBtn").disabled = false;
-  }catch(err){
-    $("scanErr").textContent = "無法開啟鏡頭（可能未授權或非 https）。請改用「上傳掌心照片」。";
-  }
-});
-
-$("upBtn").addEventListener("click", ()=> $("file").click());
-$("file").addEventListener("change", e=>{
-  const f = e.target.files && e.target.files[0]; if(!f) return;
-  const img = new Image();
-  img.onload = ()=>{
-    stopCam(); drawToShot(img, img.naturalWidth, img.naturalHeight);
-    viewer.className = "viewer shot"; mode = "img";
-    $("scanTip").textContent = "已載入照片，按「開始觀照」";
-    $("scanErr").textContent = ""; $("readBtn").disabled = false;
-  };
-  img.onerror = ()=> $("scanErr").textContent = "圖片讀取失敗，請換一張試試。";
-  img.src = URL.createObjectURL(f);
-});
-
-function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } }
-
-function drawToShot(src, sw, sh){
-  sw = sw || src.videoWidth || src.width; sh = sh || src.videoHeight || src.height;
-  const W = 480, H = 640;                       // 3:4
-  shot.width = W; shot.height = H;
-  const ctx = shot.getContext("2d");
-  const scale = Math.max(W/sw, H/sh);
-  const dw = sw*scale, dh = sh*scale;
-  ctx.drawImage(src, (W-dw)/2, (H-dh)/2, dw, dh);
-}
-
-$("readBtn").addEventListener("click", ()=>{
-  if(mode === "cam") drawToShot(video);
-  viewer.className = "viewer shot busy";
-  $("scanTip").textContent = "觀照中…請稍候"; $("scanTip").classList.add("busy");
-  $("readBtn").disabled = true;
-  setTimeout(()=>{
-    const f = analyzePalm(shot);
-    $("scanTip").classList.remove("busy");
-    if(!f){                       // 畫面裡看不到足夠的手掌，據實告知，不硬給結果
-      viewer.className = mode === "cam" ? "viewer cam" : "viewer shot";
-      $("scanTip").textContent = "";
-      $("scanErr").textContent = "看不清楚手掌——請在明亮處，讓攤平的掌心填滿畫面再試一次；或改用「自己端詳」八問。";
-      $("readBtn").disabled = false;
-      return;
-    }
-    stopCam();
-    $("scanErr").textContent = ""; $("scanTip").textContent = "";
-    viewer.className = "viewer shot";
-    show(f);
-  }, 1700);
-});
-
-/* ---- 影像取相：以明暗、紋理梯度概略推估掌相八相 ---- */
-function analyzePalm(canvas){
-  const W = canvas.width, H = canvas.height;
-  const d = canvas.getContext("2d").getImageData(0,0,W,H).data;
-  const gw = 120, gh = 160;                     // 取樣網格
-  const g = new Float32Array(gw*gh);            // 灰階
-  const skin = new Uint8Array(gw*gh);
-  let skinN = 0, brightSum = 0;
-
-  for(let y=0; y<gh; y++){
-    for(let x=0; x<gw; x++){
-      const sx = Math.floor(x/gw*W), sy = Math.floor(y/gh*H);
-      const p = (sy*W + sx)*4;
-      const r = d[p], gg = d[p+1], b = d[p+2];
-      const lum = (r*0.299 + gg*0.587 + b*0.114);
-      g[y*gw+x] = lum;
-      brightSum += lum;
-      // 粗略膚色判定
-      if(r > 55 && r >= gg && gg >= b - 12 && (r - b) > 8 && lum > 42 && lum < 245){
-        skin[y*gw+x] = 1; skinN++;
-      }
-    }
-  }
-  const bright = brightSum/(gw*gh);
-
-  // 梯度（Sobel 簡版）
-  const gx = new Float32Array(gw*gh), gy = new Float32Array(gw*gh), mag = new Float32Array(gw*gh);
-  for(let y=1; y<gh-1; y++){
-    for(let x=1; x<gw-1; x++){
-      const i = y*gw+x;
-      gx[i] = (g[i-gw+1] + 2*g[i+1] + g[i+gw+1]) - (g[i-gw-1] + 2*g[i-1] + g[i+gw-1]);
-      gy[i] = (g[i+gw-1] + 2*g[i+gw] + g[i+gw+1]) - (g[i-gw-1] + 2*g[i-gw] + g[i-gw+1]);
-      mag[i] = Math.sqrt(gx[i]*gx[i] + gy[i]*gy[i]);
-    }
-  }
-  // 畫面裡找不到足夠的手掌，就不要硬給結果
-  if(skinN < gw*gh*0.10) return null;
-
-  // 以「這隻手自己的明暗落差」定線條門檻，避免受相片對比度／光線影響
-  const lums = [];
-  for(let i=0; i<gw*gh; i++) if(skin[i]) lums.push(g[i]);
-  lums.sort((a,b)=> a-b);
-  const p05 = lums[Math.floor(lums.length*0.05)], p95 = lums[Math.floor(lums.length*0.95)];
-  const contrast = Math.max(12, p95 - p05);
-  const thr = contrast * 0.42;                           // 超過此梯度視為「一條紋」
-  const skinMean = lums[Math.floor(lums.length*0.5)];
-
-  // 區域線條密度＝該區膚色像素中，紋路像素所佔比例（與絕對亮度無關）
-  function lineFrac(x0,x1,y0,y1,arr){
-    let hit=0, n=0;
-    for(let y=Math.floor(y0*gh); y<Math.floor(y1*gh); y++)
-      for(let x=Math.floor(x0*gw); x<Math.floor(x1*gw); x++){
-        const i=y*gw+x; if(!skin[i]) continue;
-        if(Math.abs(arr[i]) > thr) hit++;
-        n++;
-      }
-    return n ? hit/n : 0;
-  }
-  function meanLum(x0,x1,y0,y1){
-    let s=0,n=0;
-    for(let y=Math.floor(y0*gh); y<Math.floor(y1*gh); y++)
-      for(let x=Math.floor(x0*gw); x<Math.floor(x1*gw); x++){
-        const i=y*gw+x; if(!skin[i]) continue; s+=g[i]; n++;
-      }
-    return n ? s/n : skinMean;
-  }
-
-  // 膚色區外框（估掌形）
-  let minX=gw, maxX=0, minY=gh, maxY=0, topN=0;
-  for(let y=0; y<gh; y++) for(let x=0; x<gw; x++){
-    if(!skin[y*gw+x]) continue;
-    if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y;
-    if(y < gh*0.30) topN++;
-  }
-  const bw = Math.max(1, maxX-minX), bh = Math.max(1, maxY-minY);
-  const ratio = bh/bw;                                   // 越大＝越修長
-
-  const base  = Math.max(0.012, lineFrac(0.12,0.88,0.14,0.92, mag));
-  const upper = lineFrac(0.18,0.85,0.26,0.44, mag);      // 感情線帶
-  const mid   = lineFrac(0.18,0.85,0.44,0.62, mag);      // 智慧線帶
-  const lower = lineFrac(0.14,0.52,0.56,0.88, mag);      // 生命線帶
-  const vert  = lineFrac(0.36,0.68,0.42,0.88, gx);       // 縱向線（事業線）：取水平梯度
-  const mLum  = meanLum(0.14,0.52,0.58,0.88);            // 金星丘亮度
-  const mLine = lineFrac(0.14,0.52,0.58,0.88, mag);      // 金星丘紋理（越少＝越飽滿）
-
-  const N = v => clamp(Math.round(v), 2, 98);
-  const rel = (v, k) => 50 + (v/base - 1) * k;           // 與這隻手的平均比較
-  const f = {
-    form:    N(28 + (ratio - 1.05) * 150),
-    head:    N(rel(mid,   82)),
-    heart:   N(rel(upper, 82)),
-    life:    N(rel(lower, 78)),
-    fate:    N(rel(vert,  72)),
-    mount:   N(50 + (mLum/Math.max(skinMean,1) - 1)*120 + (1 - mLine/base)*30),
-    density: N(base * 250 - 8),
-    finger:  N((topN / skinN) * 180 + (ratio - 1.0) * 46)
-  };
-  return f;
-}
-
-/* ===================== 顯示結果 ===================== */
+/* ─────────── 呈現 ─────────── */
 function show(f){
   feats = f;
-  const r = rank(f);
-  const top = YUANTONG[r[0].i];
-  const a1  = YUANTONG[r[1].i];
-  const a2  = YUANTONG[r[2].i];
 
-  /* 八相長條 */
+  /* 前次紀錄：同一台機器、掌相相近、且相隔不久 → 判為同一人，仍出同一門 */
+  let prev = null;
+  try{ prev = JSON.parse(localStorage.getItem(LS) || "null"); }catch(_){}
+  const same = prev && prev.dev === deviceId() && prev.feats
+            && palmDist(prev.feats, f) <= 12
+            && (Date.now() - (prev.t||0)) < 1000*60*60*24*30;
+
+  let trio;
+  if(same){ trio = prev.trio; repeatN = (prev.times || 1) + 1; }
+  else    { trio = drawDoors(f); repeatN = 1; }
+
+  const top = YUANTONG[trio[0]], a1 = YUANTONG[trio[1]], a2 = YUANTONG[trio[2]];
+  picked = top;
+  try{ localStorage.setItem(LS, JSON.stringify({dev:deviceId(), feats:f, trio:trio, times:repeatN, t:Date.now()})); }catch(_){}
+
+  /* 掌相八觀 */
   $("bars").innerHTML = PALM_KEYS.map(k=>{
     const m = PALM_META[k], v = f[k];
-    return `<div class="b">
-      <div class="bn">${m.label}</div>
-      <div class="bt">
-        <div class="bg"><i style="width:${v}%"></i></div>
-        <div class="bv">${v >= 50 ? m.hi : m.lo}</div>
-      </div></div>`;
+    return `<div class="b"><div class="bn">${m.label}</div><div>
+      <div class="bg"><i style="width:${v}%"></i></div>
+      <div class="bv">${v >= 50 ? m.hi : m.lo}</div></div></div>`;
   }).join("");
 
-  /* 最突出的三相文字 */
-  const ordered = PALM_KEYS.map(k=>({k, d: Math.abs(f[k]-50)})).sort((x,y)=> y.d - x.d).slice(0,3);
-  $("traits").innerHTML = ordered.map(o=>{
-    const m = PALM_META[o.k];
-    return `<p><b>${m.label}｜</b>${f[o.k] >= 50 ? m.hiTxt : m.loTxt}</p>`;
-  }).join("");
+  const ordered = PALM_KEYS.map(k=>({k, d: Math.abs(f[k]-50)})).sort((x,y)=> y.d - x.d);
+  $("traits").innerHTML =
+    ordered.slice(0,3).map(o=>{
+      const m = PALM_META[o.k];
+      return `<p><b>${m.label}｜</b>${f[o.k] >= 50 ? m.hiTxt : m.loTxt}</p>`;
+    }).join("") +
+    `<div class="all"><b>其餘五觀：</b>` +
+    ordered.slice(3).map(o=>{
+      const m = PALM_META[o.k];
+      return `${m.label}${f[o.k] >= 50 ? m.hi : m.lo}`;
+    }).join("、") + `。此八觀但述君掌之特色與性情之所偏，不論吉凶。</div>`;
 
-  /* 本命圓通 */
+  /* 印證提示 */
+  $("repeatNote").innerHTML = repeatN > 1
+    ? `<div class="again-note">此為第 <b>${repeatN}</b> 次觀照。掌相與前次相近，判為同一人，故仍得此門——<br>同門再現，非是巧合，正可添幾分信心，依之用功。</div>`
+    : "";
+
+  /* 所請之門 */
   $("hit").innerHTML = `
     <div class="cat">${top.cat}圓通</div>
     <div class="ic">${top.icon}</div>
@@ -684,58 +503,70 @@ function show(f){
     <div class="sl">${top.seal}</div>
     <div class="no">二十五圓通之第 ${top.n} 門　·　入門處：${top.door}</div>`;
   $("rSutra").textContent  = top.sutra;
+  $("rSrc").textContent    = `《大佛頂如來密因修證了義諸菩薩萬行首楞嚴經》・CBETA 大正藏 T0945・卷${top.n===25?"六":"五"}`;
   $("rStory").textContent  = top.story;
   $("rPalm").textContent   = top.palm;
   $("rManju").textContent  = top.manju;
   $("rManjuN").textContent = top.manjuNote;
-  $("rSteps").innerHTML    = top.practice.map(s=>`<li>${s}</li>`).join("");
+  $("rThree").innerHTML    = threeHTML(top);
   $("rDaily").textContent  = top.daily;
+  $("rTalk").innerHTML     = talkHTML(top);
   $("rAlso").innerHTML = [a1,a2].map(x=>`
     <a href="#y${x.n}" onclick="openOne(${x.n})">
       <div class="n">第 ${x.n} 門</div>
       <div class="m">${x.icon} ${x.short}</div>
-      <div class="g">${x.gate}　${x.seal}</div>
-    </a>`).join("");
+      <div class="g">${x.gate}　${x.seal}</div></a>`).join("");
 
   /* 耳根歸趣 */
-  const ear = YUANTONG[24];
   $("earBox").innerHTML = top.n === 25 ? `
     <div class="ttl">文 殊 菩 薩 揀 選 ． 第 一</div>
-    <div class="mn">你相應的，正是文殊菩薩所揀選的耳根圓通</div>
+    <div class="mn">所請者，正是文殊菩薩所揀選之耳根圓通</div>
     <div class="vs">反聞聞自性<br>性成無上道</div>
-    <div class="ex">二十五門之中，文殊菩薩獨選此門為末法眾生的第一方便：「此方真教體，清淨在音聞；欲取三摩提，實以聞中入。」既已相應，就從今天開始：<b>不隨聲音往外跑，回頭聽那個正在聽的。</b></div>
-  ` : `
-    <div class="ttl">無 論 你 走 哪 一 門 ． 同 歸 此 處</div>
-    <div class="mn">文殊菩薩為末法眾生揀選的：耳根圓通</div>
+    <div class="ex">二十五門之中，文殊菩薩獨取此門，為末法眾生第一方便：「此方真教體，清淨在音聞；欲取三摩提，實以聞中入。」既得此門，即自今日始：<b>不隨聲而外馳，迴光聽那能聽者。</b></div>`
+  : `
+    <div class="ttl">無 論 由 何 門 入 ． 同 歸 此 處</div>
+    <div class="mn">文殊菩薩為末法眾生所揀選者：耳根圓通</div>
     <div class="vs">此方真教體　清淨在音聞<br>反聞聞自性　性成無上道</div>
     <div class="ex">
-      佛陀問文殊菩薩：這二十五門，哪一門最適合娑婆世界的眾生？文殊菩薩答得很清楚——這個世界的眾生耳根最利，真正的教體就在「聽」。
-      與其用耳朵去記住一尊又一尊佛的名號，何不回頭聽聽那個「能聽的自己」？<b>一根既返源，六根成解脫。</b><br><br>
-      所以你的「${top.gate}」是入手處、是最順你習性的那一扇門；而<b>反聞聞自性</b>，是所有門後面的同一條路。
-      今天可以這樣練：坐下來，不塞耳機，先聽外面的聲音；然後不去管聲音是什麼，只注意——<b>現在，是誰在聽？</b>
+      世尊問文殊菩薩：此二十五門，何者最契娑婆眾生之機？文殊菩薩答之甚明——此方眾生耳根最利，真教體正在一個「聞」字。
+      與其以耳受持一佛復一佛之名，何不迴光自聞那能聞者？<b>一根既返源，六根成解脫。</b><br><br>
+      故君所請之「${top.gate}」，是入手之處、是最順君習性的那一扇門；而<b>反聞聞自性</b>，則是諸門之後的同一條路。
+      今日即可如是行：坐定，不塞其耳，先聽外境之聲；次則不問其為何聲，但觀——<b>此時，是誰在聽？</b>
     </div>`;
+
+  /* 寄送 */
+  BaoyanMail.mount($("mailBox"), {n: top.n, trio: trio, feats: f, times: repeatN});
 
   $("stage").style.display = "none";
   $("result").classList.add("show");
   $("result").scrollIntoView({behavior:"smooth", block:"start"});
 }
 
+function threeHTML(y){
+  return `
+    <div class="tx j"><div class="k">教理</div><div class="v">${y.practice.jiao}</div></div>
+    <div class="tx f"><div class="k">福德</div><div class="v">${y.practice.fude}</div></div>
+    <div class="tx c"><div class="k">禪定</div><div class="v">${y.practice.chan}</div></div>`;
+}
+function talkHTML(y){
+  return `<a href="${y.talk.url}" target="_blank" rel="noopener">
+      <span class="yt"></span>
+      <span><span class="tt">${y.talk.title}</span>
+      <span class="by">見輝法師《秒懂楞嚴》第 ${y.talk.ep} 集　·　YouTube</span></span></a>`;
+}
+
 $("againBtn").addEventListener("click", ()=>{
   $("result").classList.remove("show");
   $("stage").style.display = "block";
-  $("quizBox").style.display = "none"; $("scanBox").style.display = "none";
-  document.querySelectorAll(".mode").forEach(m=>m.classList.remove("on"));
-  viewer.className = "viewer"; mode = ""; $("readBtn").disabled = true;
-  $("scanTip").textContent = "請選擇下方任一方式取像"; $("scanErr").textContent = "";
-  stopCam();
+  $("quizBox").style.display = "none";
   window.scrollTo({top:0, behavior:"smooth"});
 });
 $("printBtn").addEventListener("click", ()=> window.print());
 
-/* ===================== 二十五圓通全覽 ===================== */
+/* ─────────── 二十五圓通全覽 ─────────── */
 (function(){
   const groups = [
-    {k:"六塵", t:"六 塵 圓 通 ・ 從 外 境 入", d:"色、聲、香、味、觸、法——六種被認識的對象"},
+    {k:"六塵", t:"六 塵 圓 通 ・ 從 外 境 入", d:"色、聲、香、味、觸、法——六種所認識的對象"},
     {k:"五根", t:"五 根 圓 通 ・ 從 感 官 入", d:"眼、鼻、舌、身、意——五種能認識的器官"},
     {k:"六識", t:"六 識 圓 通 ・ 從 心 識 入", d:"六根對六塵所生的分別作用"},
     {k:"七大", t:"七 大 圓 通 ・ 從 元 素 入", d:"地、水、火、風、空、識、見——構成世界的七種大性"},
@@ -755,13 +586,13 @@ $("printBtn").addEventListener("click", ()=> window.print());
           <div class="blk"><div class="blk-h">經 文 ． 聖 者 自 陳</div>
             <div class="sutra">${y.sutra}</div>
             <div class="src">CBETA 大正藏 T0945．卷${y.n === 25 ? "六" : "五"}</div></div>
-          <div class="blk"><div class="blk-h">白 話</div><div class="plain">${y.story}</div></div>
+          <div class="blk"><div class="blk-h">其 人 其 事</div><div class="plain">${y.story}</div></div>
           <div class="blk"><div class="blk-h">文 殊 菩 薩 的 揀 選</div>
             <div class="manju"><div class="v">${y.manju}</div><div class="n">${y.manjuNote}</div></div></div>
-          <div class="blk"><div class="blk-h">相 應 掌 相</div><div class="plain">${y.palm}</div></div>
-          <div class="blk"><div class="blk-h">修 法</div>
-            <ol class="steps">${y.practice.map(s=>`<li>${s}</li>`).join("")}</ol></div>
-          <div class="blk"><div class="daily"><div class="t">帶 著 走 的 一 句</div>${y.daily}</div></div>
+          <div class="blk"><div class="blk-h">與 此 門 相 契 的 掌 相</div><div class="plain">${y.palm}</div></div>
+          <div class="blk"><div class="blk-h">三 學 功 課</div><div class="three">${threeHTML(y)}</div></div>
+          <div class="blk"><div class="daily"><div class="t">日 用 寄 語</div>${y.daily}</div></div>
+          <div class="blk talk"><div class="blk-h">見 輝 法 師 開 示</div>${talkHTML(y)}</div>
         </div>`;
       div.appendChild(det);
     });
