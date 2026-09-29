@@ -62,17 +62,24 @@
   .legend{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:13.5px; color:var(--ink2);}
   .legend i{display:inline-block; width:22px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px;}
 
-  /* 八問 */
-  .qstep{font-size:13px; letter-spacing:.24em; color:var(--gold); text-align:center; margin-bottom:6px;}
-  .qtext{font-size:19px; font-weight:700; line-height:1.75; text-align:center;}
-  .qhint{font-size:14px; color:var(--ink3); text-align:center; margin-top:8px;}
-  .opts{margin-top:22px; display:flex; flex-direction:column; gap:10px;}
-  .opt{background:#fff; border:1px solid var(--line2); border-radius:3px; padding:15px 18px;
-    cursor:pointer; font-size:16.5px; line-height:1.7; transition:.12s; text-align:left;
-    font-family:inherit; color:var(--ink); width:100%;}
-  .opt:hover{border-color:var(--gold); background:#fffdf8; transform:translateX(3px);}
-  .prog{height:3px; background:var(--paper3); border-radius:2px; margin-top:22px; overflow:hidden;}
-  .prog i{display:block; height:100%; background:var(--gold); transition:width .3s;}
+  /* 鏡頭 */
+  .viewer{position:relative; width:100%; aspect-ratio:3/4; max-width:330px; margin:22px auto 0;
+    background:#1b1913; border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+  .viewer video, .viewer canvas.shot{position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; display:none;}
+  .viewer.cam video{display:block;} .viewer.shot canvas.shot{display:block;}
+  .viewer .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#9a917c; font-size:14.5px; text-align:center; padding:26px; line-height:2;}
+  .viewer.cam .ph, .viewer.shot .ph{display:none;}
+  .guide{position:absolute; inset:0; pointer-events:none; opacity:.45;}
+  .guide svg{width:100%; height:100%;}
+  .scanbar{position:absolute; left:0; right:0; height:2px; display:none;
+    background:linear-gradient(90deg,transparent,#e8d7a8,transparent); box-shadow:0 0 14px #e8d7a8;}
+  .viewer.busy .scanbar{display:block; animation:scan 1.5s ease-in-out infinite;}
+  @keyframes scan{0%,100%{top:8%;}50%{top:92%;}}
+  .tip{text-align:center; color:var(--ink2); font-size:14.5px; margin-top:14px; min-height:24px;}
+  .tip.busy{animation:bl 1.4s infinite;} @keyframes bl{50%{opacity:.35;}}
+  .err{color:var(--seal); font-size:14.5px; text-align:center; margin-top:10px; line-height:1.85;}
 
   #result{display:none;}
   #result.show{display:block; animation:fade .5s ease;}
@@ -230,13 +237,41 @@
 <!-- ───── 八問 ───── -->
 <section id="stage">
   <div class="card">
-    <h2>第 一 事 ． <em>觀</em> 己 之 掌</h2>
+    <h2>第 一 事 ． <em>鏡</em> 頭 觀 掌</h2>
     <p style="text-align:center; color:var(--ink2); font-size:15.5px; margin-top:-6px;">
-      請攤開<b>慣用的那一隻手</b>，對著光，依下列八問自己端詳。<br>
-      八問所答，只用來為您說明自己的手相特色，不作吉凶之斷。
+      請攤開<b>慣用的那一隻手</b>，掌心朝向鏡頭，對準框線，光線宜足。<br>
+      所取之掌相，只用來為您說明自己的手相特色，不作吉凶之斷。
     </p>
 
-    <div style="margin-top:22px; padding-top:20px; border-top:1px dashed var(--line2);">
+    <div class="viewer" id="viewer">
+      <video id="video" playsinline muted autoplay></video>
+      <canvas class="shot" id="shot"></canvas>
+      <div class="ph">按下「開啟鏡頭」<br>攤平掌心，讓手掌填滿畫面</div>
+      <div class="guide">
+        <svg viewBox="0 0 210 285" preserveAspectRatio="xMidYMid meet">
+          <g fill="none" stroke="#e8d7a8" stroke-width="1.6" stroke-dasharray="6 5">
+            <rect x="52" y="112" width="102" height="130" rx="27"/>
+            <rect x="60" y="48" width="21" height="72" rx="10"/>
+            <rect x="85" y="34" width="21" height="86" rx="10"/>
+            <rect x="110" y="44" width="21" height="76" rx="10"/>
+            <rect x="135" y="72" width="19" height="50" rx="9"/>
+            <rect x="37" y="150" width="21" height="72" rx="10" transform="rotate(25 47 155)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="scanbar"></div>
+    </div>
+    <div class="tip" id="tip">按「開啟鏡頭」開始</div>
+    <div class="err" id="err"></div>
+    <div class="row">
+      <button class="btn ghost sm" id="camBtn">開 啟 鏡 頭</button>
+      <button class="btn sm" id="readBtn" disabled>拍 攝 ． 觀 照</button>
+    </div>
+    <p style="font-size:13.5px; color:var(--ink3); margin-top:16px; text-align:center; line-height:1.9;">
+      影像只在您的手機或電腦上運算，<b>不會上傳、不會儲存</b>，也不會出現在信中。
+    </p>
+
+    <div style="margin-top:26px; padding-top:20px; border-top:1px dashed var(--line2);">
       <div class="blk-h">掌 紋 圖 解 ． 先 認 得 這 四 條 線</div>
       <svg class="palmfig" viewBox="0 0 210 285" aria-label="手掌掌紋圖解">
         <g class="out">
@@ -268,16 +303,6 @@
       </div>
     </div>
 
-    <div class="row"><button class="btn" id="startBtn">開 始 端 詳</button></div>
-  </div>
-
-  <div class="card" id="quizBox" style="display:none; margin-top:20px;">
-    <div class="qstep" id="qStep"></div>
-    <div class="qtext" id="qText"></div>
-    <div class="qhint" id="qHint"></div>
-    <div class="opts" id="qOpts"></div>
-    <div class="prog"><i id="qProg" style="width:0"></i></div>
-    <div class="row"><button class="btn ghost sm" id="qBack">← 上一問</button></div>
   </div>
 </section>
 
@@ -377,6 +402,7 @@
 <script src="mail.js"></script>
 <script>
 const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const LS = "baoyan_yuantong_v1";
 let feats = null, picked = null, repeatN = 1;
 
@@ -415,35 +441,145 @@ function palmDist(a,b){
   return s / PALM_KEYS.length;
 }
 
-/* ─────────── 八問 ─────────── */
-let qi = 0, ans = [];
-function renderQ(){
-  const q = QUIZ[qi];
-  $("qStep").textContent = `第 ${qi+1} 問 ／ 共 ${QUIZ.length} 問`;
-  $("qText").textContent = q.q;
-  $("qHint").textContent = q.hint;
-  $("qProg").style.width = (qi / QUIZ.length * 100) + "%";
-  $("qBack").style.visibility = qi === 0 ? "hidden" : "visible";
-  const box = $("qOpts"); box.innerHTML = "";
-  q.opts.forEach((o, k)=>{
-    const b = document.createElement("button");
-    b.className = "opt"; b.type = "button"; b.textContent = o.t;
-    b.addEventListener("click", ()=>{ ans[qi] = k; qi++; qi < QUIZ.length ? renderQ() : finish(); });
-    box.appendChild(b);
-  });
-}
-$("qBack").addEventListener("click", ()=>{ if(qi>0){ qi--; renderQ(); } });
-$("startBtn").addEventListener("click", ()=>{
-  qi = 0; ans = [];
-  $("quizBox").style.display = "block"; renderQ();
-  $("quizBox").scrollIntoView({behavior:"smooth", block:"start"});
+/* ─────────── 鏡頭取掌相 ─────────── */
+let stream = null;
+const viewer = $("viewer"), video = $("video"), shot = $("shot");
+
+$("camBtn").addEventListener("click", async ()=>{
+  $("err").textContent = "";
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    $("err").textContent = "此瀏覽器不支援相機。請改用手機瀏覽器，或在支援相機的裝置上開啟本頁。";
+    return;
+  }
+  $("tip").textContent = "正在開啟鏡頭…";
+  try{
+    try{ stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false}); }
+    catch(_){ stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false}); }
+    video.srcObject = stream; await video.play();
+    viewer.className = "viewer cam";
+    $("tip").textContent = "掌心朝鏡頭、對準框線，按「拍攝．觀照」";
+    $("readBtn").disabled = false;
+  }catch(err){
+    $("tip").textContent = "";
+    $("err").textContent = (err && err.name === "NotAllowedError")
+      ? "尚未允許使用相機。請在瀏覽器網址列的相機圖示中允許，再按一次「開啟鏡頭」。"
+      : "無法開啟相機（可能是裝置沒有鏡頭，或網頁非以 https 開啟）。";
+  }
 });
 
-function finish(){
-  const f = {};
-  PALM_KEYS.forEach(k=>{ f[k] = 50; });
-  QUIZ.forEach((q, i)=>{ f[q.key] = q.opts[ans[i]].v; });
-  show(f);
+function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } }
+
+function grab(){
+  const W = 480, H = 640, sw = video.videoWidth, sh = video.videoHeight;
+  shot.width = W; shot.height = H;
+  const ctx = shot.getContext("2d");
+  const sc = Math.max(W/sw, H/sh);
+  ctx.drawImage(video, (W - sw*sc)/2, (H - sh*sc)/2, sw*sc, sh*sc);
+}
+
+$("readBtn").addEventListener("click", ()=>{
+  grab();
+  viewer.className = "viewer shot busy";
+  $("tip").textContent = "觀照中…請稍候"; $("tip").classList.add("busy");
+  $("readBtn").disabled = true; $("err").textContent = "";
+  setTimeout(()=>{
+    const f = analyzePalm(shot);
+    $("tip").classList.remove("busy");
+    if(!f){                       // 畫面裡看不到足夠的手掌，據實告知，不硬給結果
+      viewer.className = "viewer cam";
+      $("tip").textContent = "掌心朝鏡頭、對準框線，按「拍攝．觀照」";
+      $("err").textContent = "看不清楚手掌——請在明亮處，讓攤平的掌心填滿畫面，再拍一次。";
+      $("readBtn").disabled = false;
+      return;
+    }
+    stopCam();
+    viewer.className = "viewer shot"; $("tip").textContent = "";
+    show(f);
+  }, 1700);
+});
+
+/* 影像取相：以明暗與紋理梯度推估掌相八觀 */
+function analyzePalm(canvas){
+  const W = canvas.width, H = canvas.height;
+  const d = canvas.getContext("2d").getImageData(0,0,W,H).data;
+  const gw = 120, gh = 160;
+  const g = new Float32Array(gw*gh), skin = new Uint8Array(gw*gh);
+  let skinN = 0;
+
+  for(let y=0; y<gh; y++) for(let x=0; x<gw; x++){
+    const p = (Math.floor(y/gh*H)*W + Math.floor(x/gw*W))*4;
+    const r = d[p], gg = d[p+1], b = d[p+2];
+    const lum = r*0.299 + gg*0.587 + b*0.114;
+    g[y*gw+x] = lum;
+    if(r > 55 && r >= gg && gg >= b - 12 && (r - b) > 8 && lum > 42 && lum < 245){
+      skin[y*gw+x] = 1; skinN++;
+    }
+  }
+  if(skinN < gw*gh*0.10) return null;
+
+  const gx = new Float32Array(gw*gh), gy = new Float32Array(gw*gh), mag = new Float32Array(gw*gh);
+  for(let y=1; y<gh-1; y++) for(let x=1; x<gw-1; x++){
+    const i = y*gw+x;
+    gx[i] = (g[i-gw+1] + 2*g[i+1] + g[i+gw+1]) - (g[i-gw-1] + 2*g[i-1] + g[i+gw-1]);
+    gy[i] = (g[i+gw-1] + 2*g[i+gw] + g[i+gw+1]) - (g[i-gw-1] + 2*g[i-gw] + g[i-gw+1]);
+    mag[i] = Math.sqrt(gx[i]*gx[i] + gy[i]*gy[i]);
+  }
+
+  /* 以這隻手自身的明暗落差定線條門檻，免受相片對比度／光線影響 */
+  const lums = [];
+  for(let i=0; i<gw*gh; i++) if(skin[i]) lums.push(g[i]);
+  lums.sort((a,b)=> a-b);
+  const contrast = Math.max(12, lums[Math.floor(lums.length*0.95)] - lums[Math.floor(lums.length*0.05)]);
+  const thr = contrast * 0.42;
+  const skinMean = lums[Math.floor(lums.length*0.5)];
+
+  function lineFrac(x0,x1,y0,y1,arr){
+    let hit=0, n=0;
+    for(let y=Math.floor(y0*gh); y<Math.floor(y1*gh); y++)
+      for(let x=Math.floor(x0*gw); x<Math.floor(x1*gw); x++){
+        const i=y*gw+x; if(!skin[i]) continue;
+        if(Math.abs(arr[i]) > thr) hit++;
+        n++;
+      }
+    return n ? hit/n : 0;
+  }
+  function meanLum(x0,x1,y0,y1){
+    let s=0,n=0;
+    for(let y=Math.floor(y0*gh); y<Math.floor(y1*gh); y++)
+      for(let x=Math.floor(x0*gw); x<Math.floor(x1*gw); x++){
+        const i=y*gw+x; if(!skin[i]) continue; s+=g[i]; n++;
+      }
+    return n ? s/n : skinMean;
+  }
+
+  let minX=gw, maxX=0, minY=gh, maxY=0, topN=0;
+  for(let y=0; y<gh; y++) for(let x=0; x<gw; x++){
+    if(!skin[y*gw+x]) continue;
+    if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y;
+    if(y < gh*0.30) topN++;
+  }
+  const ratio = Math.max(1, maxY-minY) / Math.max(1, maxX-minX);
+
+  const base  = Math.max(0.012, lineFrac(0.12,0.88,0.14,0.92, mag));
+  const upper = lineFrac(0.18,0.85,0.26,0.44, mag);   // 感情線帶
+  const mid   = lineFrac(0.18,0.85,0.44,0.62, mag);   // 智慧線帶
+  const lower = lineFrac(0.14,0.52,0.56,0.88, mag);   // 生命線帶
+  const vert  = lineFrac(0.36,0.68,0.42,0.88, gx);    // 縱向線（事業線）
+  const mLum  = meanLum(0.14,0.52,0.58,0.88);         // 金星丘亮度
+  const mLine = lineFrac(0.14,0.52,0.58,0.88, mag);   // 金星丘紋理
+
+  const N = v => clamp(Math.round(v), 2, 98);
+  const rel = (v, k) => 50 + (v/base - 1) * k;
+  return {
+    form:    N(28 + (ratio - 1.05) * 150),
+    head:    N(rel(mid,   82)),
+    heart:   N(rel(upper, 82)),
+    life:    N(rel(lower, 78)),
+    fate:    N(rel(vert,  72)),
+    mount:   N(50 + (mLum/Math.max(skinMean,1) - 1)*120 + (1 - mLine/base)*30),
+    density: N(base * 250 - 8),
+    finger:  N((topN / skinN) * 180 + (ratio - 1.0) * 46)
+  };
 }
 
 /* ─────────── 呈現 ─────────── */
@@ -454,7 +590,7 @@ function show(f){
   let prev = null;
   try{ prev = JSON.parse(localStorage.getItem(LS) || "null"); }catch(_){}
   const same = prev && prev.dev === deviceId() && prev.feats
-            && palmDist(prev.feats, f) <= 12
+            && palmDist(prev.feats, f) <= 16
             && (Date.now() - (prev.t||0)) < 1000*60*60*24*30;
 
   let trio;
@@ -554,7 +690,10 @@ function talkHTML(y){
 $("againBtn").addEventListener("click", ()=>{
   $("result").classList.remove("show");
   $("stage").style.display = "block";
-  $("quizBox").style.display = "none";
+  stopCam();
+  viewer.className = "viewer";
+  $("readBtn").disabled = true;
+  $("tip").textContent = "按「開啟鏡頭」開始"; $("err").textContent = "";
   window.scrollTo({top:0, behavior:"smooth"});
 });
 $("printBtn").addEventListener("click", ()=> window.print());
