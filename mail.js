@@ -55,6 +55,12 @@ const BaoyanMail = (function(){
     box.style.display = "block";
     purgeLegacyContact();
     const fid = rnd();
+    /* 本次寄送的識別碼。務必是 mount 的區域變數，不可掛在 #mailBox 上——
+       #mailBox 是頁面上固定的節點，「再觀照一次」不會重建它，
+       識別碼若留在上面，下一位送出時會沿用前一位的 rid，
+       後端（Code.gs 以 rid 去重，快取 600 秒）會判為重複而直接回 ok，
+       信根本沒寄、名單也沒這一筆，畫面卻顯示「已寄出」。 */
+    let rid = null;
     box.className = "mailbox";
     box.innerHTML = `
       <div class="mailbox-h">寄 一 份 到 我 的 信 箱</div>
@@ -84,9 +90,9 @@ const BaoyanMail = (function(){
 
       btn.disabled = true; const label = btn.textContent; btn.textContent = "寄 送 中 …";
       say("正在為您寄出…","");
-      if(!box.dataset.rid) box.dataset.rid = newRid();
+      if(!rid) rid = newRid();   // 同一次送出的三次重試共用，避免重複寄信
       const res = await post(Object.assign({}, payload,
-        {name:name, email:email, page:location.href, rid:box.dataset.rid}));
+        {name:name, email:email, page:location.href, rid:rid}));
       if(res && res.ok){
         nameEl.value = ""; mailEl.value = "";   // 不留在畫面上給下一位看見
         box.classList.add("done");

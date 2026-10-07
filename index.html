@@ -461,20 +461,20 @@ function deviceId(){
   return v;
 }
 
-/* ─────────── 以「掌相＋本機」為種子抽門 ───────────
-   同一台機器、同一副掌相，所抽必是同一門；
-   掌相以十分位取整，故微幅差異仍歸為同一人，重抽仍得同門，作為印證。 */
-function hash32(s){
-  let h = 2166136261 >>> 0;
-  for(let i=0; i<s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
-  return h >>> 0;
-}
-function seedOf(f){
-  return hash32(PALM_KEYS.map(k => Math.round(f[k]/10)).join("-") + "|" + deviceId());
+/* ─────────── 抽門：純亂數 ───────────
+   門不由掌相推算，也不由掌相決定——第一次觀照即以亂數請出一門。
+   「同一人重測必得同門」不靠重新計算，而是把第一次請出的門記下來（見 show()），
+   掌相只用來認人，不參與決定是哪一門。站上對信眾的說明（本檔分際第一條）因此為實。 */
+function freshSeed(){
+  try{
+    const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] >>> 0;
+  }catch(_){
+    return ((Math.random() * 4294967296) >>> 0);
+  }
 }
 /* 由種子產生不重複的三門：第一門為所請之門，其餘二門為旁通 */
-function drawDoors(f){
-  let s = seedOf(f);
+function drawDoors(){
+  let s = freshSeed();
   const next = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
   const bag = YUANTONG.map((_,i)=>i);
   for(let i=bag.length-1; i>0; i--){ const j = Math.floor(next()*(i+1)); const t=bag[i]; bag[i]=bag[j]; bag[j]=t; }
@@ -483,6 +483,11 @@ function drawDoors(f){
 function palmDist(a,b){
   let s=0; for(const k of PALM_KEYS) s += Math.abs(a[k]-b[k]);
   return s / PALM_KEYS.length;
+}
+/* 八觀之中差距最大的那一觀——防止平均把單項的大落差稀釋掉 */
+function palmMaxDist(a,b){
+  let m=0; for(const k of PALM_KEYS) m = Math.max(m, Math.abs(a[k]-b[k]));
+  return m;
 }
 
 /* ─────────── 鏡頭取掌相 ─────────── */
@@ -630,16 +635,19 @@ function analyzePalm(canvas){
 function show(f){
   feats = f;
 
-  /* 前次紀錄：同一台機器、掌相相近、且相隔不久 → 仍出同一門 */
+  /* 前次紀錄：同一台機器、掌相「相同」、且相隔不久 → 仍是同一門。
+     門檻必須嚴：八觀平均差 <= 4 且每一觀各自差距 <= 8，只容得下同一隻手兩次拍攝的晃動。
+     放寬到「相近」會把下一位信眾誤判成同一個人，把別人的門給他。 */
   let prev = null;
   try{ prev = JSON.parse(localStorage.getItem(LS) || "null"); }catch(_){}
-  const same = prev && prev.dev === deviceId() && prev.feats
-            && palmDist(prev.feats, f) <= 16
-            && (Date.now() - (prev.t||0)) < 1000*60*60*24*30;
+  const same = prev && prev.dev === deviceId() && prev.feats && prev.trio
+            && palmDist(prev.feats, f) <= 4
+            && palmMaxDist(prev.feats, f) <= 8
+            && (Date.now() - (prev.t||0)) < 1000*60*60*24*7;
 
   let trio;
   if(same){ trio = prev.trio; repeatN = (prev.times || 1) + 1; }
-  else    { trio = drawDoors(f); repeatN = 1; }
+  else    { trio = drawDoors(); repeatN = 1; }
 
   const top = YUANTONG[trio[0]], a1 = YUANTONG[trio[1]], a2 = YUANTONG[trio[2]];
   picked = top;
@@ -667,7 +675,9 @@ function show(f){
 
   /* 印證提示 */
   $("repeatNote").innerHTML = repeatN > 1
-    ? `<div class="again-note">此為第 <b>${repeatN}</b> 次觀照，仍得此門——<br>同門再現，非是巧合，正可添幾分信心，依之用功。</div>`
+    ? `<div class="again-note">此為第 <b>${repeatN}</b> 次觀照。<br>
+        所請之門一經請出，即是君這一段日子用功的所依，故仍是此門——<br>
+        不必別求新門，依之用功即是。</div>`
     : "";
 
   /* 所請之門 */
