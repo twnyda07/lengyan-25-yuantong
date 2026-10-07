@@ -13,12 +13,14 @@ const MAIL_API = "https://script.google.com/macros/s/AKfycbzbw0CVcqsMvbX5VYsO-se
 const BaoyanMail = (function(){
   const LS_KEY = "baoyan_yuantong_contact";
 
-  function loadContact(){
-    try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch(_){ return {}; }
+  /* 姓名與 Email 一律不記在這台裝置：不寫入、不預先帶入，每位都要自己重打。
+     展示區等共用裝置最怕上一位的資料留在欄位裡被下一位誤送。
+     舊版曾把聯絡資料存進 localStorage，這裡順手把殘留的清掉。 */
+  function purgeLegacyContact(){
+    try{ localStorage.removeItem(LS_KEY); }catch(_){}
   }
-  function saveContact(name, email){
-    try{ localStorage.setItem(LS_KEY, JSON.stringify({name:name, email:email})); }catch(_){}
-  }
+  /* 給欄位一組隨機的 name，連瀏覽器自己的自動填入也不容易猜中要填哪一格 */
+  function rnd(){ return Math.random().toString(36).slice(2,10); }
   function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
   function newRid(){ return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2,10); }
 
@@ -51,22 +53,23 @@ const BaoyanMail = (function(){
   function mount(box, payload){
     if(!MAIL_API){ box.style.display = "none"; return; }
     box.style.display = "block";
-    const saved = loadContact();
-    const esc = s => String(s||"").replace(/"/g,"&quot;");
+    purgeLegacyContact();
+    const fid = rnd();
     box.className = "mailbox";
     box.innerHTML = `
       <div class="mailbox-h">寄 一 份 到 我 的 信 箱</div>
       <p class="mailbox-p">留下稱呼與 Email，這一份<b>掌相八觀</b>與<b>所請圓通</b>的完整內容<br>
         ——含經文、文殊揀選、三學功課與見輝法師開示連結——即寄達您的信箱，以便隨時展讀、依之用功。</p>
       <div class="mailbox-f">
-        <input type="text"  class="m-name" maxlength="30" placeholder="您的姓名或稱呼" value="${esc(saved.name)}" autocomplete="name">
-        <input type="email" class="m-mail" maxlength="80" placeholder="您的 Email"     value="${esc(saved.email)}" autocomplete="email" inputmode="email">
+        <input type="text"  class="m-name" name="n-${fid}" maxlength="30" placeholder="您的姓名或稱呼" autocomplete="off" autocorrect="off" spellcheck="false">
+        <input type="email" class="m-mail" name="e-${fid}" maxlength="80" placeholder="您的 Email"     autocomplete="off" autocorrect="off" spellcheck="false" inputmode="email">
         <label class="mailbox-agree"><input type="checkbox" class="m-ok" checked>
           <span>我同意寶嚴禪寺以此 Email 寄送本次觀照結果；日後若有法會、課程等法訊，亦歡迎通知我。</span></label>
         <button class="btn" type="button">寄 送 結 果</button>
       </div>
       <div class="mailbox-msg"></div>
-      <div class="mailbox-note">※ 我們只保存您的姓名與 Email，供寄送與法訊之用；八問所答僅用於信中為您說明掌相特色。</div>`;
+      <div class="mailbox-note">※ 姓名與 Email <b>不會記在這台裝置</b>，每位都請自行填寫（共用裝置請安心）。
+        我們只在寺方保存，供寄送與法訊之用；掌相八觀僅用於信中為您說明掌相特色。</div>`;
 
     const nameEl = box.querySelector(".m-name"), mailEl = box.querySelector(".m-mail"),
           okEl   = box.querySelector(".m-ok"),   btn    = box.querySelector(".btn"),
@@ -85,7 +88,7 @@ const BaoyanMail = (function(){
       const res = await post(Object.assign({}, payload,
         {name:name, email:email, page:location.href, rid:box.dataset.rid}));
       if(res && res.ok){
-        saveContact(name, email);
+        nameEl.value = ""; mailEl.value = "";   // 不留在畫面上給下一位看見
         box.classList.add("done");
         say("已寄出。請查收信箱（約一分鐘內；若未見，請看看「促銷」或「垃圾郵件」匣）。","ok");
       }else{
