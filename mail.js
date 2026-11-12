@@ -29,8 +29,8 @@ const BaoyanMail = (function(){
   /* 每次連線的等待上限。沒有上限時，公共 Wi-Fi 擋住 script.google.com（不回應）
      按鈕會一直卡在「寄送中…」好幾分鐘。第一次給長一點：Apps Script 冷啟動加寄信本來就要幾秒。 */
   const WAIT = [20000, 12000, 12000], BLIND_WAIT = 10000, SLOW_HINT = 8000;
-  const NET_FAIL = "連不上寄信服務。公共 Wi-Fi 常會擋住 Google 的寄信網址——" +
-                   "請關掉 Wi-Fi、改用手機行動網路，再按一次「寄送結果」（不會重複寄）。";
+  const NET_FAIL = "連不上寄信服務（公共 Wi-Fi 常會擋住）。請直接按下方「用我的郵件 App 寄給自己」；" +
+                   "或關掉 Wi-Fi、改用行動網路，再按一次「寄送結果」（不會重複寄）。";
 
   /* 送一次並讀完回應；超過 ms 毫秒就中止（讀回應本身也算在內） */
   async function once(body, ms, blind){
@@ -74,7 +74,7 @@ const BaoyanMail = (function(){
     st.textContent = ".mailbox [hidden]{display:none !important;}" +
       ".mailbox-alt{margin:14px auto 0; max-width:400px; padding-top:14px; border-top:1px dashed var(--line,#ccc);}" +
       ".mailbox-alt-t{font-size:15.5px; line-height:1.8; color:var(--ink,#131d33); margin-bottom:6px;}" +
-      ".mailbox-alt .btn{display:block; width:100%; box-sizing:border-box; margin-top:9px; text-decoration:none; text-align:center;}";
+      ".mailbox-alt .btn{display:block; width:100%; box-sizing:border-box; margin-top:9px; text-decoration:none; text-align:center; letter-spacing:.04em; text-indent:0; padding:13px 10px; font-size:16px;}";
     document.head.appendChild(st);
   }
   function resultText(root){
@@ -85,7 +85,15 @@ const BaoyanMail = (function(){
       if(t) out.push(t);
     });
     let s = out.join("\n\n");
-    if(s.length > 2500) s = s.slice(0, 2500) + "\n……（全文請回網站觀看）";
+    if(s.length > 6000) s = s.slice(0, 6000) + "\n……（全文請回網站觀看）";
+    /* innerText 不含網址：把結果裡的外部連結（如見輝法師開示影片）另列在後 */
+    const links = [];
+    Array.prototype.forEach.call(root.querySelectorAll("a[href^='http']"), function(a){
+      if(a.closest(".mailbox, .nextgate, .row")) return;
+      const t = String(a.innerText || "").replace(/\s+/g, " ").trim();
+      if(links.indexOf(a.href) < 0) links.push(t ? "▶ " + t + "\n" + a.href : a.href);
+    });
+    if(links.length) s += "\n\n" + links.join("\n\n");
     return s;
   }
   function altPack(root, name){
@@ -125,8 +133,8 @@ const BaoyanMail = (function(){
       </div>
       <div class="mailbox-msg"></div>
       <div class="mailbox-alt" hidden>
-        <div class="mailbox-alt-t">不必等網路——也可以直接用您自己的手機保存這份結果：</div>
-        <a class="btn ghost m-alt-mail" href="#">用手機的郵件 App 寄給自己</a>
+        <div class="mailbox-alt-t">直接用您自己的手機保存這份結果：</div>
+        <a class="btn m-alt-mail" href="#">用我的郵件 App 寄給自己</a>
         <button class="btn ghost m-alt-share" type="button" hidden>分享到 LINE／其他 App 保存</button>
       </div>
       <div class="mailbox-note">※ 姓名與 Email <b>不會記在這台裝置</b>，每位都請自行填寫（共用裝置請安心）。
@@ -148,6 +156,7 @@ const BaoyanMail = (function(){
       altMail.setAttribute("href", mailtoHref(email, altP));
       altShare.hidden = (typeof navigator.share !== "function");
       alt.hidden = false;
+      try{ alt.scrollIntoView({behavior:"smooth", block:"nearest"}); }catch(_){}
     };
     altMail.addEventListener("click", (e)=>{ if(!altP) e.preventDefault(); });
     altShare.addEventListener("click", ()=>{
@@ -180,7 +189,7 @@ const BaoyanMail = (function(){
         const raw = (res && res.msg) || "";
         const tech = raw && !/[\u4e00-\u9fff]/.test(raw);
         if(tech) console.warn("[BaoyanMail] 後端錯誤：", raw);
-        say(tech ? "寄信服務暫時故障，工作人員正在處理。請先用下方按鈕，把這份結果寄給自己或存到 LINE。"
+        say(tech ? "寄信服務暫停中。請按下方「用我的郵件 App 寄給自己」——收件人與內容都已幫您填好，在郵件畫面按「傳送」即可。"
                  : (raw || "寄送失敗，請稍後再試。"), "bad");
         msg.title = tech ? raw : "";
         showAlt(name, email);
