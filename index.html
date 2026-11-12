@@ -247,6 +247,16 @@
     .tx{grid-template-columns:52px 1fr; gap:11px;}
   }
   @media print{ #stage,.row,.btn,.mailbox{display:none !important;} body{background:#fff;} }
+
+  /* 本站資訊（寶嚴禪寺所有開發一律附） */
+  .siteinfo{margin:30px auto 0; text-align:left; font-size:16px; line-height:1.85; color:var(--ink2);
+    background:var(--paper2); border:1px solid var(--line2); border-radius:4px; padding:16px 20px;}
+  .siteinfo .si-h{color:var(--gold); font-weight:700; letter-spacing:.12em; margin-bottom:6px;}
+  .siteinfo dl{display:grid; grid-template-columns:max-content 1fr; gap:4px 12px; margin:0;}
+  .siteinfo dt{color:var(--ink3); white-space:nowrap;}
+  .siteinfo dd{margin:0; color:var(--ink); word-break:break-word;}
+  .siteinfo a{color:var(--gold); text-decoration:underline; text-underline-offset:3px; display:inline-block; padding:6px 0; margin:-6px 0;}
+  @media(max-width:420px){ .siteinfo dl{grid-template-columns:1fr; gap:0;} .siteinfo dd{margin-bottom:6px;} }
 </style>
 </head>
 <body>
@@ -437,8 +447,18 @@
   <b>寶嚴山寶嚴禪寺</b>　Baoyan Chan Monastery<br>
   經文出處：CBETA 大正藏 T0945《大佛頂首楞嚴經》卷五、卷六<br>
   開示出處：見輝法師《秒懂楞嚴》（見輝法師閱藏居）<br>
-  © 寶嚴禪寺．願以此功德，普及於一切
+  願以此功德，普及於一切
 </footer>
+<section class="siteinfo" aria-label="本站資訊">
+  <div class="si-h">本站資訊</div>
+  <dl>
+    <dt>名稱：</dt><dd>楞嚴二十五圓通．掌紋觀照</dd>
+    <dt>網址：</dt><dd><a href="https://twnyda07.github.io/lengyan-25-yuantong/">twnyda07.github.io/lengyan-25-yuantong</a></dd>
+    <dt>特別功能：</dt><dd>拍一張手掌照片，看掌相八觀；從楞嚴二十五圓通請出一門，讀經文與修法，並歸到觀世音菩薩耳根圓通；照片只在本機運算、不上傳；可把結果寄到自己的信箱。</dd>
+    <dt>創作者／版權所有：</dt><dd>© 2026 寶嚴山寶嚴禪寺　保留一切權利</dd>
+  </dl>
+</section>
+
 
 </div>
 
