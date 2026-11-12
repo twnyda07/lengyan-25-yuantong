@@ -176,7 +176,13 @@ const BaoyanMail = (function(){
         say("已寄出。請查收信箱（約一分鐘內；若未見，請看看「促銷」或「垃圾郵件」匣）。","ok");
       }else{
         btn.disabled = false; btn.textContent = label;
-        say((res && res.msg) || "寄送失敗，請稍後再試。","bad");
+        /* 後端程式錯誤（英文技術訊息）不直接丟給信眾看：改用中文說明並導向下方備援；原文留在 title 與 console 供工作人員查 */
+        const raw = (res && res.msg) || "";
+        const tech = raw && !/[\u4e00-\u9fff]/.test(raw);
+        if(tech) console.warn("[BaoyanMail] 後端錯誤：", raw);
+        say(tech ? "寄信服務暫時故障，工作人員正在處理。請先用下方按鈕，把這份結果寄給自己或存到 LINE。"
+                 : (raw || "寄送失敗，請稍後再試。"), "bad");
+        msg.title = tech ? raw : "";
         showAlt(name, email);
       }
     });
