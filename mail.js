@@ -65,6 +65,40 @@ const BaoyanMail = (function(){
     }finally{ clearTimeout(slow); }
   }
 
+  /* ── 備援：寄信服務連不上（公共 Wi-Fi 擋住、或當日配額用完）時，
+        改用訪客手機自己的郵件 App／分享，把畫面上的結果寄給自己。完全不經過 script.google.com。 */
+  let altStyled = false;
+  function altCSS(){
+    if(altStyled) return; altStyled = true;
+    const st = document.createElement("style");
+    st.textContent = ".mailbox [hidden]{display:none !important;}" +
+      ".mailbox-alt{margin:14px auto 0; max-width:400px; padding-top:14px; border-top:1px dashed var(--line,#ccc);}" +
+      ".mailbox-alt-t{font-size:15.5px; line-height:1.8; color:var(--ink,#131d33); margin-bottom:6px;}" +
+      ".mailbox-alt .btn{display:block; width:100%; box-sizing:border-box; margin-top:9px; text-decoration:none; text-align:center;}";
+    document.head.appendChild(st);
+  }
+  function resultText(root){
+    const out = [];
+    Array.prototype.forEach.call(root.children, function(el){
+      if(el.matches(".mailbox, .nextgate, .row, button, script, style") || !el.getClientRects().length) return;
+      const t = String(el.innerText || "").replace(/[ \t　]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+      if(t) out.push(t);
+    });
+    let s = out.join("\n\n");
+    if(s.length > 2500) s = s.slice(0, 2500) + "\n……（全文請回網站觀看）";
+    return s;
+  }
+  function altPack(root, name){
+    return { subject: "【寶嚴禪寺】掌紋觀照．所請圓通 — " + name,
+             body: name + " 菩薩 您好：\n\n" + resultText(root) + "\n\n" +
+                   location.origin + location.pathname + "\n© 寶嚴禪寺" };
+  }
+  function mailtoHref(email, p){
+    return "mailto:" + encodeURIComponent(email).replace(/%40/g, "@") +
+      "?subject=" + encodeURIComponent(p.subject) +
+      "&body=" + encodeURIComponent(p.body.replace(/\r?\n/g, "\r\n"));
+  }
+
   /* payload：{n, trio:[i,i,i], feats:{八觀}, times} */
   function mount(box, payload){
     if(!MAIL_API){ box.style.display = "none"; return; }
@@ -90,13 +124,36 @@ const BaoyanMail = (function(){
         <button class="btn" type="button">寄 送 結 果</button>
       </div>
       <div class="mailbox-msg"></div>
+      <div class="mailbox-alt" hidden>
+        <div class="mailbox-alt-t">不必等網路——也可以直接用您自己的手機保存這份結果：</div>
+        <a class="btn ghost m-alt-mail" href="#">用手機的郵件 App 寄給自己</a>
+        <button class="btn ghost m-alt-share" type="button" hidden>分享到 LINE／其他 App 保存</button>
+      </div>
       <div class="mailbox-note">※ 姓名與 Email <b>不會記在這台裝置</b>，每位都請自行填寫（共用裝置請安心）。
         我們只在寺方保存，供寄送與法訊之用；掌相八觀僅用於信中為您說明掌相特色。</div>`;
 
     const nameEl = box.querySelector(".m-name"), mailEl = box.querySelector(".m-mail"),
-          okEl   = box.querySelector(".m-ok"),   btn    = box.querySelector(".btn"),
+          okEl   = box.querySelector(".m-ok"),   btn    = box.querySelector(".mailbox-f .btn"),
           msg    = box.querySelector(".mailbox-msg");
     const say = (t, c) => { msg.textContent = t; msg.className = "mailbox-msg " + (c||""); };
+
+    altCSS();
+    const alt = box.querySelector(".mailbox-alt"), altMail = box.querySelector(".m-alt-mail"),
+          altShare = box.querySelector(".m-alt-share");
+    const altRoot = box.closest("section") || box.parentElement;
+    let altP = null;
+    const hideAlt = ()=>{ alt.hidden = true; altMail.setAttribute("href", "#"); altP = null; };
+    const showAlt = (name, email)=>{
+      altP = altPack(altRoot, name);
+      altMail.setAttribute("href", mailtoHref(email, altP));
+      altShare.hidden = (typeof navigator.share !== "function");
+      alt.hidden = false;
+    };
+    altMail.addEventListener("click", (e)=>{ if(!altP) e.preventDefault(); });
+    altShare.addEventListener("click", ()=>{
+      if(altP && navigator.share) navigator.share({title: altP.subject, text: altP.body}).catch(()=>{});
+    });
+    nameEl.addEventListener("input", hideAlt); mailEl.addEventListener("input", hideAlt);
 
     btn.addEventListener("click", async ()=>{
       const name = nameEl.value.trim(), email = mailEl.value.trim();
@@ -114,11 +171,13 @@ const BaoyanMail = (function(){
         ()=>say("網路較慢，仍在為您寄出…（若您連的是公共 Wi-Fi，可改用手機行動網路）",""));
       if(res && res.ok){
         nameEl.value = ""; mailEl.value = "";   // 不留在畫面上給下一位看見
+        hideAlt();
         box.classList.add("done");
         say("已寄出。請查收信箱（約一分鐘內；若未見，請看看「促銷」或「垃圾郵件」匣）。","ok");
       }else{
         btn.disabled = false; btn.textContent = label;
         say((res && res.msg) || "寄送失敗，請稍後再試。","bad");
+        showAlt(name, email);
       }
     });
   }
