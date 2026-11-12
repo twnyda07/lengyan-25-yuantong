@@ -216,7 +216,7 @@ function buildMail_(req) {
       + '<td style="padding:6px 10px 6px 0;color:#5d5648;white-space:nowrap">' + esc_(m.label) + '</td>'
       + '<td style="padding:6px 0;width:100%">'
       +   '<div style="background:#e9e1d1;border-radius:5px;height:9px;max-width:300px">'
-      +     '<div style="background:#9a7b3f;border-radius:5px;height:9px;width:' + v + '%"></div></div>'
+      +     '<div style="background:#9a7b3f;border-radius:5px;height:9px;width:' + Math.round(60 + v * 0.4) + '%"></div></div>'   // 長條最短 60%，避免信眾以為「線短＝不好」
       +   '<div style="font-size:13px;color:#8b8271;padding-top:2px">' + esc_(v >= 50 ? m.hi : m.lo) + '</div>'
       + '</td></tr>';
   }).join("");

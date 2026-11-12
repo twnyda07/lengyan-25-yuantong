@@ -657,7 +657,7 @@ function show(f){
   $("bars").innerHTML = PALM_KEYS.map(k=>{
     const m = PALM_META[k], v = f[k];
     return `<div class="b"><div class="bn">${m.label}</div><div>
-      <div class="bg"><i style="width:${v}%"></i></div>
+      <div class="bg"><i style="width:${Math.round(60 + v*0.4)}%"></i></div>
       <div class="bv">${v >= 50 ? m.hi : m.lo}</div></div></div>`;
   }).join("");
 
