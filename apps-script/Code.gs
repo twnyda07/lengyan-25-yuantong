@@ -311,9 +311,7 @@ function buildMail_(req) {
     +     'font-size:15px;line-height:1.9">' + esc_(y.manjuNote) + '</div></div>'
 
     + h2('三 學 功 課 ． 教 理 ． 福 德 ． 禪 定')
-    + three('j', '教理', '#33405e', y.practice.jiao)
-    + three('f', '福德', '#9a7b3f', y.practice.fude)
-    + three('c', '禪定', '#3f6b4a', y.practice.chan)
+    + three('jiao') + three('fude') + three('chan')   // 鍵須與 PRACTICE_BASE／y.practice 一致
     + '<p style="font-size:13.5px;color:#8b8271;margin:8px 0 0;line-height:1.85">'
     +   '三者並行，不可偏廢：教理明其所以然，福德厚其資糧，禪定得其受用。闕一則久而生偏。</p>'
 
