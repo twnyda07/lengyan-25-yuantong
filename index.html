@@ -463,6 +463,7 @@
 </div>
 
 <script src="yuantong-data.js"></script>
+<script src="camera.js"></script>
 <script src="mail.js"></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -534,10 +535,11 @@ $("camBtn").addEventListener("click", async ()=>{
   }
   $("tip").textContent = "正在開啟鏡頭…";
   try{
-    try{ stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false}); }
-    catch(_){ stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false}); }
-    video.srcObject = stream; await video.play();
+    // 預設後鏡頭；各品牌手機都能用「換鏡頭」切到前鏡頭（camera.js）
+    stream = (await BYCam.open("environment", stream)).stream;
+    video.srcObject = stream; try{ await video.play(); }catch(_){}
     viewer.className = "viewer cam";
+    camSwitch.refresh();
     $("tip").textContent = "掌心朝鏡頭、對準框線，按「拍攝．觀照」";
     $("readBtn").disabled = false;
   }catch(err){
@@ -549,6 +551,11 @@ $("camBtn").addEventListener("click", async ()=>{
 });
 
 function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } }
+const camSwitch = BYCam.attachSwitch({
+  viewer: viewer, video: video,
+  getStream: ()=>stream, setStream: (s)=>{ stream = s; },
+  onError: (m)=>{ $("err").textContent = m; }
+});
 
 function grab(){
   const W = 480, H = 640, sw = video.videoWidth, sh = video.videoHeight;
