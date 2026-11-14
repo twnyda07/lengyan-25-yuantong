@@ -45,6 +45,10 @@
       ".bynav .bynav-crumb{flex:1 1 auto; min-width:0; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; opacity:.9; text-align:center;}" +
       ".bynav-space{height:calc(env(safe-area-inset-top,0px) + 58px);}" +
       "html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 66px);}" +
+      /* 淺色頁在手機深色模式下，導覽列也跟著轉深色（護眼） */
+      (dark ? "" : "@media (prefers-color-scheme: dark){ .bynav{background:rgba(17,22,31,.95); border-bottom-color:#3b4a64; color:#e3e8f1;}" +
+        " .bynav button{color:#8fb3e6; background:#19202d; border-color:#8fb3e6;}" +
+        " .bynav .bynav-next{color:#0b1220; background:#8fb3e6;} }") +
       "@media print{ .bynav, .bynav-space{display:none !important;} }";
     document.head.appendChild(st);
 

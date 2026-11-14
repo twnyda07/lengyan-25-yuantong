@@ -1,5 +1,6 @@
 /* 掌相八觀：由手掌照片的明暗、紋理與輪廓推估（只在本機運算，影像不上傳）
  * BYPalm.analyze(rgbaData, W, H) → {form, head, heart, life, fate, mount, density, finger, raw} 或 null
+ *   回 null 時 BYPalm.lastReason 說明原因（nohand／bg／cut／closed），頁面據以請對方重拍。
  * raw 為八觀的原始量測（純數字），隨結果一併記錄，供日後校正。 */
 (function(root){
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -78,6 +79,13 @@
     const span = r => rows[r].length ? rows[r][rows[r].length-1][1] - rows[r][0][0] + 1 : 0;
     let top = -1; for(let y=0; y<sh; y++) if(rows[y].length){ top = y; break; }
     if(top < 0) return null;
+    /* 手與背景連成一片（膚色區碰到畫面三邊以上，或多數列從左緣連到右緣）：量不到手的輪廓 */
+    let eT = 0, eB = 0, eL = 0, eR = 0;
+    for(let x=0; x<sw; x++){ if(comp[x] || comp[sw+x]) eT = 1; if(comp[(sh-1)*sw+x] || comp[(sh-2)*sw+x]) eB = 1; }
+    for(let y=0; y<sh; y++){ if(comp[y*sw] || comp[y*sw+1]) eL = 1; if(comp[y*sw+sw-1] || comp[y*sw+sw-2]) eR = 1; }
+    const bleed = anyRows && edgeRows/anyRows > 0.3;
+    if(bleed || eT + eB + eL + eR >= 3) return {ratio: null, q: 0, why: "bg"};
+    if(top <= 1) return {ratio: null, q: 0, why: "cut"};      // 指尖出了畫面上緣
     const spans = []; for(let y=top; y<sh; y++) if(rows[y].length) spans.push(span(y));
     const wEst = spans.slice().sort((a,b)=>a-b)[Math.floor(spans.length*0.75)] || 1;
 
@@ -89,7 +97,7 @@
       if(k >= 2){ if(firstMulti < 0) firstMulti = y; base = y; single = 0; }
       else if(firstMulti >= 0){ if(k === 1) single++; if(single >= need) break; }
     }
-    if(base < 0) return {ratio: null, q: 2};
+    if(base < 0) return {ratio: null, q: 2, why: "closed"};
     const w0 = Math.max(1, span(Math.min(sh-1, base+1)));
     const ws = []; let wcut = false;
     for(let y=base+1; y<=Math.min(sh-1, base + Math.max(2, Math.round(w0*0.35))); y++){
@@ -100,10 +108,9 @@
     const palmW = median(ws);
     if(palmW < 12) return null;
     /* 指縫只在指尖附近出現＝手指併攏，量不到指根 */
-    if((base - top) / palmW < 0.35) return {ratio: null, q: 2};
-    const ratio = (base - top) / palmW;
-    const cut = top <= 1, bleed = anyRows && edgeRows/anyRows > 0.3;
-    return {ratio, q: (cut || wcut || bleed) ? 0 : 1};   // 1＝量得完整、2＝手指併攏、0＝手出框或與背景相連
+    if((base - top) / palmW < 0.35) return {ratio: null, q: 2, why: "closed"};
+    if(wcut) return {ratio: null, q: 0, why: "cut"};          // 手掌碰到畫面左右緣
+    return {ratio: (base - top) / palmW, q: 1};   // 1＝量得完整；2＝手指併攏；0＝手出框或與背景相連（後兩者都請對方重拍）
   }
 
   function analyze(d, W, H){
@@ -117,7 +124,13 @@
       g[y*gw+x] = lum;
       if(isSkin(r, gg, b, lum)){ skin[y*gw+x] = 1; skinN++; }
     }
+    api.lastReason = "nohand";
     if(skinN < gw*gh*0.10) return null;
+    /* 先確認畫面裡真的有一隻完整的手：量不到手的輪廓與指根，據實請對方重拍，不以別的量值代估 */
+    const hs = handShape(d, W, H);
+    if(!hs) return null;
+    if(hs.ratio == null){ api.lastReason = hs.why || "nohand"; return null; }
+    api.lastReason = "";
 
     const gx = new Float32Array(gw*gh), gy = new Float32Array(gw*gh), mag = new Float32Array(gw*gh);
     for(let y=1; y<gh-1; y++) for(let x=1; x<gw-1; x++){
@@ -169,11 +182,10 @@
     const mLum  = meanLum(0.14,0.52,0.58,0.88);         // 金星丘亮度
     const mLine = lineFrac(0.14,0.52,0.58,0.88, mag);   // 金星丘紋理
 
-    const hs = handShape(d, W, H);
     const topFrac = topN / skinN;
     const raw = {
-      form:    hs ? hs.ratio : null,
-      formQ:   hs ? hs.q : -1,
+      form:    hs.ratio,
+      formQ:   hs.q,
       head:    mid / base,
       heart:   upper / base,
       life:    lower / base,
@@ -186,8 +198,7 @@
     };
     const lin = (k, v) => 50 + (v - CAL[k].c) * CAL[k].k;
     const fingerScore = 50 + (topFrac - CAL.finger.c) * CAL.finger.k + (boxRatio - CAL.finger.rc) * CAL.finger.rk;
-    /* 量不到手的輪廓或指根時（手指併攏、背景與膚色相近），掌形以指相代估 */
-    const formScore = (hs && hs.ratio != null) ? lin("form", hs.ratio) : fingerScore;
+    const formScore = lin("form", hs.ratio);
     const out = {
       form:    N(formScore),
       head:    N(lin("head",  raw.head)),
@@ -212,7 +223,8 @@
             "box=" + f(raw.box,3)].join(" ");
   }
 
-  const api = {analyze, rawText, CAL};
+  /* lastReason：最近一次 analyze 回 null 的原因——nohand 看不到手、bg 手與背景連成一片、cut 手出了畫面、closed 手指併攏 */
+  const api = {analyze, rawText, CAL, lastReason: ""};
   root.BYPalm = api;
   if(typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -81,6 +81,7 @@
   .tip{text-align:center; color:var(--ink2); font-size:16px; margin-top:14px; min-height:24px;}
   .tip.busy{animation:bl 1.4s infinite;} @keyframes bl{50%{opacity:.35;}}
   .err{color:var(--seal); font-size:16px; text-align:center; margin-top:10px; line-height:1.85;}
+  .inapp{font-size:15.5px; line-height:1.85; color:var(--ink2); background:var(--paper3); border-radius:4px; padding:10px 14px; margin-top:10px; text-align:left;}
 
   #result{display:none;}
   #result.show{display:block; animation:fade .5s ease;}
@@ -287,6 +288,45 @@
   .siteinfo dd{margin:0; color:var(--ink); word-break:break-word;}
   .siteinfo a{color:var(--gold); text-decoration:underline; text-underline-offset:3px; display:inline-block; padding:6px 0; margin:-6px 0;}
   @media(max-width:420px){ .siteinfo dl{grid-template-columns:1fr; gap:0;} .siteinfo dd{margin-bottom:6px;} }
+
+  /* 列印：只印自己的結果，不印鏡頭、寄信、二十五門全覽 */
+  @media print{
+    .alllist, .ear details, .inapp, #againBtn, #printBtn{display:none !important;}
+    body{font-size:15px; line-height:1.8; padding:0;}
+    header{padding-top:0;} section{margin-top:16px;} .lead{font-size:14.5px;}
+    .card, .ear{box-shadow:none; padding:14px 16px;}
+    .tx, .talk a, .manju, .b{break-inside:avoid;} h2, .blk-h, .traits .sub{break-after:avoid;}
+    .sutra, .plain, .tx .v, .traits p, .ear .ex, .daily{font-size:14.5px; line-height:1.85;}
+    footer{margin-top:20px;} .disc, .siteinfo{margin-top:16px;}
+  }
+
+  /* 深色模式（護眼）：手機設成深色時改用深色紙墨底 */
+  :root{color-scheme:light;}
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme:dark;
+      --paper:#11161f; --paper2:#19202d; --paper3:#232c3c;
+      --ink:#e3e8f1; --ink2:#b3bfd3; --ink3:#8d99ae;
+      --line:#3b4a64; --line2:#2b364b;
+      --gold:#8fb3e6; --gold2:#5d8bcb;
+      --indigo:#0b1220; --seal:#e3909f; --jade:#7cc3bd;
+    }
+    body{background-image:radial-gradient(circle at 15% 8%, rgba(120,150,200,.07), transparent 42%);}
+    .card{box-shadow:0 6px 20px rgba(0,0,0,.35);}
+    .btn, .ear .go, .nextgate .ng-b{background:var(--gold); border-color:var(--gold); color:#0b1220;}
+    .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+    .btn:hover, .ear .go:hover, .nextgate .ng-b:hover{background:var(--gold2);}
+    .btn.ghost:hover{background:var(--paper3);}
+    .palmfig .out{fill:#d3dbe8; stroke:#8d99ae;}
+    .hit .cat{color:var(--ink); background:#2a3b5c;}
+    .manju{background:var(--paper2);}
+    .manju .v, .ear .vs{color:var(--gold);}
+    .tx, .talk a, details[open], .also a:hover, .talk a:hover{background:var(--paper2);}
+    .tx .ck li::before{background:var(--paper);}
+    .daily{background:#0b1220; color:#e3e8f1;}
+    .ear{background:var(--paper2);}
+    .mailbox-f input{background:var(--paper); color:var(--ink);}
+  }
 </style>
 </head>
 <body>
@@ -335,6 +375,7 @@
       <div class="scanbar"></div>
     </div>
     <div class="tip" id="tip">按「開啟鏡頭」開始</div>
+    <p class="inapp" id="inappTip" hidden></p>
     <div class="err" id="err"></div>
     <div class="row">
       <button class="btn ghost sm" id="camBtn">開 啟 鏡 頭</button>
@@ -455,7 +496,7 @@
 </section>
 
 <!-- ───── 全覽 ───── -->
-<section>
+<section class="alllist">
   <h2 style="border:none; margin-bottom:6px;">二 十 五 <em>圓</em> 通 ． 全 覽</h2>
   <p style="text-align:center; color:var(--ink2); font-size:15px; margin-bottom:22px;">
     六塵六門、五根五門、六識六門、七大七門，加上觀世音菩薩耳根圓通，共二十五門。<br>點開任一門，讀經文、讀修法。
@@ -498,6 +539,7 @@ const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const LS = "baoyan_yuantong_v1";
 let feats = null, picked = null, repeatN = 1;
+let keepDoor = false;   // 看完結果後按「再觀照一次」或「回上頁」再拍＝同一位，沿用所請之門；按「下一位」才清掉
 
 /* ─────────── 本機識別：同一台機器（同一瀏覽器）給一個固定識別碼 ─────────── */
 function deviceId(){
@@ -544,13 +586,15 @@ async function drawDoors(){
   for(let i=rest.length-1; i>0; i--){ const j = randInt(i+1); const t=rest[i]; rest[i]=rest[j]; rest[j]=t; }
   return [top, rest[0], rest[1]];
 }
+/* 掌形、指相會隨手在畫面中的遠近位置而變，不拿來比對 */
+const CMP_KEYS = PALM_KEYS.filter(k => k !== "form" && k !== "finger");
 function palmDist(a,b){
-  let s=0; for(const k of PALM_KEYS) s += Math.abs(a[k]-b[k]);
-  return s / PALM_KEYS.length;
+  let s=0; for(const k of CMP_KEYS) s += Math.abs(a[k]-b[k]);
+  return s / CMP_KEYS.length;
 }
-/* 八觀之中差距最大的那一觀——防止平均把單項的大落差稀釋掉 */
+/* 差距最大的那一觀——防止平均把單項的大落差稀釋掉 */
 function palmMaxDist(a,b){
-  let m=0; for(const k of PALM_KEYS) m = Math.max(m, Math.abs(a[k]-b[k]));
+  let m=0; for(const k of CMP_KEYS) m = Math.max(m, Math.abs(a[k]-b[k]));
   return m;
 }
 
@@ -558,10 +602,32 @@ function palmMaxDist(a,b){
 let stream = null;
 const viewer = $("viewer"), video = $("video"), shot = $("shot");
 
+/* LINE／Facebook／IG 等 App 內建的瀏覽器常把相機擋掉，要教信眾改用手機的瀏覽器開啟 */
+function isInAppBrowser(){
+  const ua = navigator.userAgent || "";
+  return /(FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|Twitter|TikTok|; wv\))/i.test(ua);
+}
+const OPEN_OUTSIDE = "請按畫面右上角的「⋯」（或「⋮」），選「用預設瀏覽器開啟」或「在 Safari／Chrome 開啟」，再按一次「開啟鏡頭」。";
+function camErrMsg(err){
+  const n = (err && err.name) || "", inApp = isInAppBrowser();
+  if(n === "NotReadableError" || n === "TrackStartError" || n === "AbortError")
+    return "鏡頭正被其他程式占用（例如相機、視訊通話）。請先關掉那個程式，再按一次「開啟鏡頭」。" + (inApp ? "仍打不開時，" + OPEN_OUTSIDE : "");
+  if(inApp)
+    return "您是在 LINE／Facebook／IG 這類 App 裡開啟本頁，App 不讓網頁使用相機。" + OPEN_OUTSIDE;
+  if(n === "NotAllowedError" || n === "SecurityError" || n === "PermissionDeniedError")
+    return "相機還沒有被允許。請按網址列旁的「ㄅA」或鎖頭圖示，把「相機」改成允許，再按一次「開啟鏡頭」；若沒有跳出詢問，請重新整理本頁再試。";
+  if(n === "NotFoundError" || n === "DevicesNotFoundError" || n === "OverconstrainedError")
+    return "這台裝置找不到可用的鏡頭。請改用有鏡頭的手機開啟本頁。";
+  return "鏡頭沒有打開。請重新整理本頁再按「開啟鏡頭」；仍不行時，改用手機的 Safari 或 Chrome 開啟本頁。";
+}
+
 $("camBtn").addEventListener("click", async ()=>{
   $("err").textContent = "";
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    $("err").textContent = "此瀏覽器不支援相機。請改用手機瀏覽器，或在支援相機的裝置上開啟本頁。";
+    $("err").textContent = isInAppBrowser()
+      ? "您是在 LINE／Facebook／IG 這類 App 裡開啟本頁，App 不讓網頁使用相機。" + OPEN_OUTSIDE
+      : "這個瀏覽器不能使用相機。請改用手機的 Safari（iPhone）或 Chrome（Android）開啟本頁。";
+    $("inappTip").hidden = true;
     return;
   }
   $("tip").textContent = "正在開啟鏡頭…";
@@ -575,13 +641,16 @@ $("camBtn").addEventListener("click", async ()=>{
     $("readBtn").disabled = false;
   }catch(err){
     $("tip").textContent = "";
-    $("err").textContent = (err && err.name === "NotAllowedError")
-      ? "尚未允許使用相機。請在瀏覽器網址列的相機圖示中允許，再按一次「開啟鏡頭」。"
-      : "無法開啟相機（可能是裝置沒有鏡頭，或網頁非以 https 開啟）。";
+    $("err").textContent = camErrMsg(err);
+    if(isInAppBrowser()) $("inappTip").hidden = true;   // 錯誤訊息已經講了怎麼做，不再重複
   }
 });
 
 function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; } }
+if(isInAppBrowser()){
+  $("inappTip").textContent = "若鏡頭打不開：這是 LINE／Facebook／IG 裡的瀏覽器，常不讓網頁用相機。" + OPEN_OUTSIDE;
+  $("inappTip").hidden = false;
+}
 const camSwitch = BYCam.attachSwitch({
   viewer: viewer, video: video,
   getStream: ()=>stream, setStream: (s)=>{ stream = s; },
@@ -615,7 +684,11 @@ $("readBtn").addEventListener("click", ()=>{
         $("tip").classList.remove("busy");
         viewer.className = "viewer cam";
         $("tip").textContent = "掌心朝鏡頭、對準框線，按「拍攝．觀照」";
-        $("err").textContent = "看不清楚手掌——請在明亮處，把整隻手（連同手指）放進框線內，五指微微張開，再拍一次。";
+        $("err").textContent = ({
+          bg:     "手和背景連成一片，看不出手的輪廓——請把手稍微拿遠，整隻手放進框線內；背景請避開米色牆、木桌這類接近膚色的東西，再拍一次。",
+          cut:    "手有一部分出了畫面——請把手稍微拿遠，整隻手連同指尖都放進框線內，再拍一次。",
+          closed: "看不到指縫——請把五指微微張開，整隻手放進框線內，再拍一次。"
+        })[BYPalm.lastReason] || "看不清楚手掌——請在明亮處，把整隻手（連同手指）放進框線內，五指微微張開，再拍一次。";
         $("readBtn").disabled = false;
         return;
       }
@@ -640,6 +713,8 @@ async function pickDoors(f){
      放寬到「相近」會把下一位信眾誤判成同一個人，把別人的門給他。 */
   let prev = null;
   try{ prev = JSON.parse(localStorage.getItem(LS) || "null"); }catch(_){}
+  if(keepDoor && prev && prev.dev === deviceId() && Array.isArray(prev.trio))
+    return {trio: prev.trio, times: (prev.times || 1) + 1};
   const same = prev && prev.dev === deviceId() && prev.feats && prev.trio
             && palmDist(prev.feats, f) <= 4
             && palmMaxDist(prev.feats, f) <= 8
@@ -726,7 +801,7 @@ function show(f, pick){
       <div class="ar">→</div>
       <div class="st end"><b>反聞聞自性</b><span>第三關練習</span></div>
     </div>
-    <div class="vs">此方真教體　清淨在音聞<br>反聞聞自性　性成無上道</div>
+    <div class="vs">此方真教體　清淨在音聞<br>欲取三摩提　實以聞中入</div>
     <div class="src">《楞嚴經》卷六・文殊菩薩偈</div>
     <div class="try">現在就試十秒：閉上眼睛，先聽周圍的聲音；再輕輕問自己——<b>是誰在聽？</b></div>
     <a class="go" href="https://twnyda07.github.io/baoyan-53can/xiufa.html">進第三關・三分鐘聞性練習 →</a>
@@ -763,7 +838,8 @@ function talkHTML(y){
       <span class="by">見輝法師《秒懂楞嚴》第 ${y.talk.ep} 集　·　YouTube</span></span></a>`;
 }
 
-function backToScan(){
+function backToScan(keep){
+  keepDoor = !!keep;
   $("result").classList.remove("show");
   $("stage").style.display = "block";
   stopCam();
@@ -773,15 +849,15 @@ function backToScan(){
   BYNav.setResult(false);
   window.scrollTo({top:0, behavior:"smooth"});
 }
-$("againBtn").addEventListener("click", backToScan);
+$("againBtn").addEventListener("click", ()=> backToScan(true));
 /* 頂端導覽：回上頁＝結果→回到拍掌；下一位＝清掉上一位的紀錄再回到拍掌（避免下一位被當成同一人、拿到同一門） */
 BYNav.mount({
   crumb: "第二關．掌紋",
   parentUrl: "https://twnyda07.github.io/baoyan-53can/fahui.html",
   theme: "light",
   nextLabel: "↺ 下一位",
-  onBack: ()=>{ if($("result").classList.contains("show")){ backToScan(); return true; } return false; },
-  onNext: ()=>{ try{ localStorage.removeItem(LS); }catch(_){} backToScan(); }
+  onBack: ()=>{ if($("result").classList.contains("show")){ backToScan(true); return true; } return false; },
+  onNext: ()=>{ try{ localStorage.removeItem(LS); }catch(_){} backToScan(false); }
 });
 $("printBtn").addEventListener("click", ()=> window.print());
 
