@@ -87,13 +87,25 @@
   #result.show{display:block; animation:fade .5s ease;}
   @keyframes fade{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
 
-  /* 八觀 */
-  .bars{display:grid; gap:11px;}
-  .b{display:grid; grid-template-columns:78px 1fr; gap:12px; align-items:start;}
-  .b .bn{font-size:16px; letter-spacing:.1em; color:var(--ink2); text-align:right; line-height:1; margin-top:-1px;}
-  .b .bg{height:9px; background:var(--paper3); border-radius:5px; overflow:hidden;}
-  .b .bg i{display:block; height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); border-radius:5px;}
-  .b .bv{font-size:14.5px; color:var(--ink3); margin-top:3px;}
+  /* 八觀：兩端刻度（寺方 11-14）——每一觀是兩種特質之間的位置，沒有好壞高低。
+     刻度兩端顏色一樣深（中間淺），不可一端深一端淺，否則又像高低；畫面不顯示任何分數。 */
+  :root{--sc-end:#c3cfe3; --sc-mid:#e7edf6;}
+  .scnote{text-align:center; font-size:15px; line-height:1.75; color:var(--ink3); margin:-6px 0 20px; text-wrap:balance;}
+  .bars{display:grid; gap:20px 30px;}
+  @media(min-width:640px){ .bars{grid-template-columns:1fr 1fr;} }
+  .sc{min-width:0;}
+  .sc .sc-h{font-size:17px; font-weight:700; color:var(--ink); letter-spacing:.08em; line-height:1.5;}
+  .sc .sc-ends{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-top:4px;
+    font-size:15px; line-height:1.5; color:var(--ink2);}
+  .sc .sc-ends span:last-child{text-align:right;}
+  .sc .sc-tr{position:relative; height:24px; margin:6px 12px 0;}
+  .sc .sc-tr::before{content:""; position:absolute; left:-12px; right:-12px; top:8px; height:8px; border-radius:4px;
+    background:linear-gradient(90deg, var(--sc-end), var(--sc-mid) 50%, var(--sc-end));}
+  .sc .sc-dot{position:absolute; top:2px; width:0; height:0; margin-left:-10px; border:10px solid var(--gold); border-radius:50%;
+    box-shadow:0 0 0 3px var(--paper2), 0 0 0 4.5px var(--gold);}
+  .sc .sc-lv{text-align:center; font-size:16px; font-weight:700; color:var(--gold); letter-spacing:.06em; line-height:1.6; margin-top:4px;}
+  @media(max-width:360px){ .sc .sc-ends{font-size:14px; gap:8px;} }
+  @media print{ .sc{break-inside:avoid;} .sc .sc-tr::before{background:none; border:1px solid #888;} }
   .traits{margin-top:20px; padding-top:18px; border-top:1px dashed var(--line2);}
   .traits .sub{font-size:14px; letter-spacing:.26em; text-indent:.26em; color:var(--gold);
     font-weight:700; margin:4px 0 10px; display:flex; align-items:center; gap:10px;}
@@ -104,6 +116,9 @@
   .traits p b{color:var(--ink); letter-spacing:.04em;}
   .traits p.top{border-left-color:var(--gold);}
   .traits p.foot{border:none; padding:0; margin-top:16px; font-size:15px; color:var(--ink3);}
+  .traits p .combo{display:block; margin-top:6px;}
+  .palmhint{margin-top:14px; font-size:15px; line-height:1.8; color:var(--ink3); background:var(--paper3); border-radius:4px; padding:10px 14px;}
+  @media print{ .palmhint{display:none !important;} }
 
   /* 抽門 */
   .draw{text-align:center; padding:6px 0 2px;}
@@ -326,6 +341,7 @@
     .daily{background:#0b1220; color:#e3e8f1;}
     .ear{background:var(--paper2);}
     .mailbox-f input{background:var(--paper); color:var(--ink);}
+    :root{--sc-end:#4a5d7e; --sc-mid:#252f41;}
   }
 </style>
 </head>
@@ -427,8 +443,10 @@
 
   <div class="card">
     <h2>您 的 <em>掌 相 八 觀</em></h2>
+    <p class="scnote">每一觀是兩種特質之間的位置，沒有好壞高低</p>
     <div class="bars" id="bars"></div>
     <div class="traits" id="traits"></div>
+    <p class="palmhint" id="palmHint" hidden>若想看得更準，可五指微微張開、整隻手放進框線內，再按上方「回上頁」重拍一次。</p>
   </div>
 
   <div class="card" style="margin-top:20px;">
@@ -528,18 +546,19 @@
 
 </div>
 
-<script src="yuantong-data.js"></script>
-<script src="camera.js"></script>
-<script src="nav.js"></script>
-<script src="mail.js"></script>
-<script src="palm.js"></script>
-<script src="rotate.js"></script>
+<script src="yuantong-data.js?v=20261114c"></script>
+<script src="camera.js?v=20261114c"></script>
+<script src="nav.js?v=20261114c"></script>
+<script src="mail.js?v=20261114c"></script>
+<script src="palm.js?v=20261114c"></script>
+<script src="rotate.js?v=20261114c"></script>
 <script>
 const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const LS = "baoyan_yuantong_v1";
 let feats = null, picked = null, repeatN = 1;
 let keepDoor = false;   // 看完結果後按「再觀照一次」或「回上頁」再拍＝同一位，沿用所請之門；按「下一位」才清掉
+let runId = 0;          // 每次回到拍掌 +1：觀照中途按回上頁／下一位／離開本頁，晚到的結果一律作廢，不會疊到下一位畫面上
 
 /* ─────────── 本機識別：同一台機器（同一瀏覽器）給一個固定識別碼 ─────────── */
 function deviceId(){
@@ -634,6 +653,7 @@ $("camBtn").addEventListener("click", async ()=>{
   try{
     // 預設後鏡頭；各品牌手機都能用「換鏡頭」切到前鏡頭（camera.js）
     stream = (await BYCam.open("environment", stream)).stream;
+    BYCam.watch(stream, camLost);
     video.srcObject = stream; try{ await video.play(); }catch(_){}
     viewer.className = "viewer cam";
     camSwitch.refresh();
@@ -653,8 +673,19 @@ if(isInAppBrowser()){
 }
 const camSwitch = BYCam.attachSwitch({
   viewer: viewer, video: video,
-  getStream: ()=>stream, setStream: (s)=>{ stream = s; },
+  getStream: ()=>stream, setStream: (s)=>{ stream = s; BYCam.watch(s, camLost); },
   onError: (m)=>{ $("err").textContent = m; }
+});
+/* 鏡頭被手機收回（切到別的 App、來電、LINE 掃碼）：畫面不會自己變，要講清楚並回到「開啟鏡頭」 */
+function camLost(s){
+  if(reading || !viewer.classList.contains("cam") || (s && s !== stream)) return;
+  stopCam(); viewer.className = "viewer";
+  $("readBtn").disabled = true;
+  $("tip").textContent = "按「開啟鏡頭」開始";
+  $("err").textContent = "鏡頭已被手機關閉（可能切換到別的 App），請再按一次「開啟鏡頭」。";
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible" && stream && viewer.classList.contains("cam") && !BYCam.live(stream)) camLost(stream);
 });
 
 function grab(){
@@ -668,7 +699,9 @@ function grab(){
 let reading = false;
 $("readBtn").addEventListener("click", ()=>{
   if(reading) return;
+  if(!BYCam.live(stream)){ camLost(stream); return; }
   reading = true;
+  const my = ++runId;
   grab();
   viewer.className = "viewer shot busy";
   $("tip").textContent = "觀照中…請稍候"; $("tip").classList.add("busy");
@@ -676,28 +709,29 @@ $("readBtn").addEventListener("click", ()=>{
   const t0 = Date.now();
   const hold = ms => new Promise(r => setTimeout(r, Math.max(0, ms - (Date.now() - t0))));
   setTimeout(async ()=>{
+    if(my !== runId){ reading = false; return; }   // 已按回上頁／下一位
     try{
       let f = null;
       try{ f = analyzePalm(shot); }catch(_){ f = null; }
       if(!f){                       // 畫面裡看不到足夠的手掌，據實告知，不硬給結果
         await hold(1700);
+        if(my !== runId) return;
         $("tip").classList.remove("busy");
         viewer.className = "viewer cam";
         $("tip").textContent = "掌心朝鏡頭、對準框線，按「拍攝．觀照」";
         $("err").textContent = ({
-          bg:     "手和背景連成一片，看不出手的輪廓——請把手稍微拿遠，整隻手放進框線內；背景請避開米色牆、木桌這類接近膚色的東西，再拍一次。",
-          cut:    "手有一部分出了畫面——請把手稍微拿遠，整隻手連同指尖都放進框線內，再拍一次。",
-          closed: "看不到指縫——請把五指微微張開，整隻手放進框線內，再拍一次。"
-        })[BYPalm.lastReason] || "看不清楚手掌——請在明亮處，把整隻手（連同手指）放進框線內，五指微微張開，再拍一次。";
+          wall:   "畫面裡只看到背景（牆面或桌面），看不到手——請把手掌對著鏡頭、放進框線內，再拍一次。"
+        })[BYPalm.lastReason] || "畫面裡看不到手掌——請在明亮處，把手掌對著鏡頭、放進框線內，再拍一次。";
         $("readBtn").disabled = false;
         return;
       }
       const [pick] = await Promise.all([pickDoors(f), hold(1700)]);
+      if(my !== runId) return;      // 等號碼時已按回上頁／下一位：上一位的結果作廢（晚到的門號由 rotate.js 留給下一位）
       $("tip").classList.remove("busy");
       stopCam();
       viewer.className = "viewer shot"; $("tip").textContent = "";
       show(f, pick);
-    }finally{ reading = false; }
+    }finally{ if(my === runId) reading = false; }
   }, 30);
 });
 
@@ -735,24 +769,11 @@ function show(f, pick){
   try{ localStorage.setItem(LS, JSON.stringify({dev:deviceId(), feats:f8, trio:trio, times:repeatN, t:Date.now()})); }catch(_){}
 
   /* 掌相八觀 */
-  $("bars").innerHTML = PALM_KEYS.map(k=>{
-    const m = PALM_META[k], v = f[k];
-    return `<div class="b"><div class="bn">${m.label}</div><div>
-      <div class="bg"><i style="width:${Math.round(60 + v*0.4)}%"></i></div>
-      <div class="bv">${v >= 50 ? m.hi : m.lo}</div></div></div>`;
-  }).join("");
-
-  const ordered = PALM_KEYS.map(k=>({k, d: Math.abs(f[k]-50)})).sort((x,y)=> y.d - x.d);
-  const line = (k, cls)=>{
-    const m = PALM_META[k], hi = f[k] >= 50;
-    return `<p class="${cls}"><b>${m.label}｜${hi ? m.hi : m.lo}</b><br>${hi ? m.hiTxt : m.loTxt}</p>`;
-  };
-  $("traits").innerHTML =
-    `<div class="sub">最 為 突 出 之 三 觀</div>` +
-    ordered.slice(0,3).map(o=> line(o.k, "top")).join("") +
-    `<div class="sub">其 餘 五 觀</div>` +
-    ordered.slice(3).map(o=> line(o.k, "rest")).join("") +
-    `<p class="foot">此八觀但述君掌之特色與性情之所偏，不論吉凶。</p>`;
+  const ph = palmHTML(f);
+  $("bars").innerHTML = ph.bars;
+  $("traits").innerHTML = ph.traits;
+  /* 手指併攏、出框、背景近膚色等用備用估法量的：照樣給結果，只溫和建議怎麼拍更準 */
+  $("palmHint").hidden = !(f.raw && f.raw.formQ !== 1);
 
   /* 印證提示 */
   $("repeatNote").innerHTML = repeatN > 1
@@ -817,6 +838,29 @@ function show(f, pick){
   $("result").scrollIntoView({behavior:"smooth", block:"start"});
 }
 
+/* 掌相八觀：兩端刻度＋五級說明（文字全在 yuantong-data.js，信件用同一份）。畫面不出現任何分數。 */
+function palmHTML(f){
+  const bars = PALM_KEYS.map(k=>{
+    const m = PALM_META[k], L = m.lv[palmLevel(f[k])], pos = Math.max(0, Math.min(100, Math.round(f[k])));
+    return `<div class="sc"><div class="sc-h">${m.label}</div>
+      <div class="sc-ends"><span>${m.ends[0]}</span><span>${m.ends[1]}</span></div>
+      <div class="sc-tr" role="img" aria-label="${m.label}的刻度：${m.ends[0]}與${m.ends[1]}之間，${L[0]}"><i class="sc-dot" style="left:${pos}%"></i></div>
+      <div class="sc-lv">${L[0]}</div></div>`;
+  }).join("");
+  const ordered = palmOrder(f);
+  const line = (k, cls)=>{
+    const m = PALM_META[k], L = m.lv[palmLevel(f[k])], extra = k === "form" ? palmCombo(f) : "";
+    return `<p class="${cls}"><b>${m.label}｜${L[0]}</b><br>${L[1]}${extra ? `<span class="combo">${extra}</span>` : ""}</p>`;
+  };
+  const traits =
+    `<div class="sub">最 為 突 出 之 三 觀</div>` +
+    ordered.slice(0,3).map(k=> line(k, "top")).join("") +
+    `<div class="sub">其 餘 五 觀</div>` +
+    ordered.slice(3).map(k=> line(k, "rest")).join("") +
+    `<p class="foot">此八觀但述君掌之特色與性情之所偏，不論吉凶。</p>`;
+  return {bars, traits};
+}
+
 function threeHTML(y){
   return ["jiao","fude","chan"].map(k=>{
     const b = PRACTICE_BASE[k];
@@ -840,6 +884,8 @@ function talkHTML(y){
 
 function backToScan(keep){
   keepDoor = !!keep;
+  runId++; reading = false;
+  $("tip").classList.remove("busy");
   $("result").classList.remove("show");
   $("stage").style.display = "block";
   stopCam();
@@ -850,14 +896,29 @@ function backToScan(keep){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 $("againBtn").addEventListener("click", ()=> backToScan(true));
-/* 頂端導覽：回上頁＝結果→回到拍掌；下一位＝清掉上一位的紀錄再回到拍掌（避免下一位被當成同一人、拿到同一門） */
+/* 結果畫面、照片、寄信區（含填到一半的姓名與 Email）全部清掉 */
+function wipeResult(){
+  feats = null; picked = null;
+  BaoyanMail.clear($("mailBox"));
+  ["bars","traits","repeatNote","hit","rAlso","earBox"].forEach(id=>{ const e = $(id); if(e) e.innerHTML = ""; });
+  try{ shot.width = shot.width; }catch(_){}
+}
+/* 頂端導覽：回上頁＝結果（或觀照中）→回到拍掌；下一位＝清掉上一位的紀錄再回到拍掌（避免下一位被當成同一人、拿到同一門） */
 BYNav.mount({
   crumb: "第二關．掌紋",
   parentUrl: "https://twnyda07.github.io/baoyan-53can/fahui.html",
   theme: "light",
+  followDark: true,
   nextLabel: "↺ 下一位",
-  onBack: ()=>{ if($("result").classList.contains("show")){ backToScan(true); return true; } return false; },
-  onNext: ()=>{ try{ localStorage.removeItem(LS); }catch(_){} backToScan(false); }
+  onBack: ()=>{
+    if(reading){ backToScan(keepDoor); return true; }   // 觀照中：取消這次（不因此把上一位的門沿用給這位）
+    if($("result").classList.contains("show")){ backToScan(true); return true; }
+    return false;
+  },
+  onNext: ()=>{ try{ localStorage.removeItem(LS); }catch(_){} wipeResult(); backToScan(false); },
+  /* 離開本頁／從上一頁快取回來：畫面與姓名 Email 一律清掉。
+     「同一人重測同一門」的紀錄留著（仍要掌相幾乎一模一樣才算同一人），但不再無條件沿用上一位的門 */
+  onLeave: ()=>{ wipeResult(); backToScan(false); }
 });
 $("printBtn").addEventListener("click", ()=> window.print());
 

@@ -4,6 +4,7 @@
  *  - 很多 Android 機一次只能開一顆鏡頭，舊串流沒先關掉，第二顆會開失敗（NotReadableError）。
  *  - 所以：先關舊的 → 依「指定前後」試 → 對不上就依鏡頭名稱找 → 再不行就依序輪下一顆鏡頭。
  *  - 每次都檢查「真的換到別顆了沒」，沒換到就繼續試；全部失敗時把原鏡頭開回來，不讓畫面變黑。
+ *  - BYCam.live(stream)／BYCam.watch(stream, onLost)：切到別的 App 回來鏡頭已被系統關掉時，頁面要能知道並講清楚。
  */
 (function(){
   var md = navigator.mediaDevices;
@@ -171,5 +172,19 @@
     };
   }
 
-  window.BYCam = { open: open, flip: flip, attachSwitch: attachSwitch, _state: state };
+  /* 鏡頭還活著嗎：手機切到別的 App、來電、LINE 掃碼時，系統會收回鏡頭（影像軌道變成 ended），畫面卻不會自己變 */
+  function live(s){
+    var t = s && s.getVideoTracks && s.getVideoTracks()[0];
+    return !!t && t.readyState === "live";
+  }
+  /* 鏡頭被系統收回時通知頁面（onLost(stream)）；同一串流只掛一次 */
+  function watch(s, onLost){
+    if(!s || !s.getVideoTracks || s.__bycamWatched) return;
+    s.__bycamWatched = true;
+    s.getVideoTracks().forEach(function(t){
+      t.addEventListener("ended", function(){ if(onLost) onLost(s); });
+    });
+  }
+
+  window.BYCam = { open: open, flip: flip, attachSwitch: attachSwitch, live: live, watch: watch, _state: state };
 })();

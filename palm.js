@@ -1,6 +1,10 @@
 /* 掌相八觀：由手掌照片的明暗、紋理與輪廓推估（只在本機運算，影像不上傳）
  * BYPalm.analyze(rgbaData, W, H) → {form, head, heart, life, fate, mount, density, finger, raw} 或 null
- *   回 null 時 BYPalm.lastReason 說明原因（nohand／bg／cut／closed），頁面據以請對方重拍。
+ *   寺方 11-14 裁示「寧可給結果，不要讓信眾一直重拍」：只有「明顯沒有手」才回 null
+ *   （膚色區 < 畫面 12%，或整個畫面 > 95% 幾乎同一個顏色＝拍到牆面／桌面），BYPalm.lastReason＝nohand／wall。
+ *   手指併攏、碰到畫面邊緣、部分出框、背景近膚色、手太近：照樣給結果——掌形改用備用估法，量不準的觀往 50 靠攏；
+ *   raw.formQ 記下是哪一種（1＝量得完整、2＝手指併攏、0＝出框或與背景相連、3＝量不到手的輪廓），
+ *   BYPalm.lastLoose 為 true 時頁面可溫和建議「五指微張、整隻手入框」，但不擋結果。
  * raw 為八觀的原始量測（純數字），隨結果一併記錄，供日後校正。 */
 (function(root){
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -124,13 +128,20 @@
       g[y*gw+x] = lum;
       if(isSkin(r, gg, b, lum)){ skin[y*gw+x] = 1; skinN++; }
     }
-    api.lastReason = "nohand";
-    if(skinN < gw*gh*0.10) return null;
-    /* 先確認畫面裡真的有一隻完整的手：量不到手的輪廓與指根，據實請對方重拍，不以別的量值代估 */
-    const hs = handShape(d, W, H);
-    if(!hs) return null;
-    if(hs.ratio == null){ api.lastReason = hs.why || "nohand"; return null; }
+    api.lastReason = "nohand"; api.lastLoose = false;
+    if(skinN < gw*gh*0.12) return null;                       // 膚色太少：畫面裡沒有手
+    /* 整個畫面幾乎同一個顏色（每一色版與中位數差 ≤8 的點 > 95%）＝只拍到牆面或桌面 */
+    {
+      const R = [], G = [], B = [];
+      for(let y=0; y<gh; y+=2) for(let x=0; x<gw; x+=2){ const p = (Math.floor(y/gh*H)*W + Math.floor(x/gw*W))*4; R.push(d[p]); G.push(d[p+1]); B.push(d[p+2]); }
+      const mr = median(R), mg = median(G), mb = median(B);
+      let same = 0; for(let i=0; i<R.length; i++) if(Math.abs(R[i]-mr) <= 8 && Math.abs(G[i]-mg) <= 8 && Math.abs(B[i]-mb) <= 8) same++;
+      if(same / R.length > 0.95){ api.lastReason = "wall"; return null; }
+    }
+    /* 手的輪廓量得到就量掌形；量不完整也照樣給結果（掌形改用備用估法，見下） */
+    const hs = handShape(d, W, H) || {ratio: null, q: 3, why: "nohand"};
     api.lastReason = "";
+    api.lastLoose = hs.ratio == null;
 
     const gx = new Float32Array(gw*gh), gy = new Float32Array(gw*gh), mag = new Float32Array(gw*gh);
     for(let y=1; y<gh-1; y++) for(let x=1; x<gw-1; x++){
@@ -185,7 +196,7 @@
     const topFrac = topN / skinN;
     const raw = {
       form:    hs.ratio,
-      formQ:   hs.q,
+      formQ:   hs.ratio == null ? hs.q : 1,
       head:    mid / base,
       heart:   upper / base,
       life:    lower / base,
@@ -198,16 +209,20 @@
     };
     const lin = (k, v) => 50 + (v - CAL[k].c) * CAL[k].k;
     const fingerScore = 50 + (topFrac - CAL.finger.c) * CAL.finger.k + (boxRatio - CAL.finger.rc) * CAL.finger.rk;
-    const formScore = lin("form", hs.ratio);
+    /* 掌形備用估法（量不到指根時）：以指相與膚色外框長寬比合估，再往 50 靠攏一半 */
+    const formScore = hs.ratio != null ? lin("form", hs.ratio)
+      : 50 + ((fingerScore - 50) * 0.6 + (boxRatio - CAL.finger.rc) * 40 * 0.4) * 0.5;
+    /* 出框、與背景相連、量不到輪廓（formQ 0／3）：膚色範圍不可靠，其他七觀也往 50 靠攏（保留六成） */
+    const soft = (hs.ratio == null && hs.q !== 2) ? (v => 50 + (v - 50) * 0.6) : (v => v);
     const out = {
       form:    N(formScore),
-      head:    N(lin("head",  raw.head)),
-      heart:   N(lin("heart", raw.heart)),
-      life:    N(lin("life",  raw.life)),
-      fate:    N(lin("fate",  raw.fate)),
-      mount:   N(50 + CAL.mount.off + (raw.mountLum - 1)*120 + (1 - raw.mountLine)*30),
-      density: N(lin("density", raw.density)),
-      finger:  N(fingerScore)
+      head:    N(soft(lin("head",  raw.head))),
+      heart:   N(soft(lin("heart", raw.heart))),
+      life:    N(soft(lin("life",  raw.life))),
+      fate:    N(soft(lin("fate",  raw.fate))),
+      mount:   N(soft(50 + CAL.mount.off + (raw.mountLum - 1)*120 + (1 - raw.mountLine)*30)),
+      density: N(soft(lin("density", raw.density))),
+      finger:  N(soft(fingerScore))
     };
     out.raw = raw;
     return out;
@@ -223,8 +238,9 @@
             "box=" + f(raw.box,3)].join(" ");
   }
 
-  /* lastReason：最近一次 analyze 回 null 的原因——nohand 看不到手、bg 手與背景連成一片、cut 手出了畫面、closed 手指併攏 */
-  const api = {analyze, rawText, CAL, lastReason: ""};
+  /* lastReason：最近一次 analyze 回 null 的原因——nohand 看不到手、wall 只拍到牆面或桌面。
+     lastLoose：最近一次結果是用備用估法（手指併攏、出框、與背景相連…），頁面只溫和建議，不擋結果 */
+  const api = {analyze, rawText, CAL, lastReason: "", lastLoose: false};
   root.BYPalm = api;
   if(typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
