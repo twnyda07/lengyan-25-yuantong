@@ -21,7 +21,8 @@ const CFG = {
   ADMIN_MAX_ROWS: 3000
 };
 
-const HEAD = ["時間","姓名","Email","所請之門","門名","法門","第幾次","掌相八觀","來源頁","狀態"];
+const HEAD = ["時間","姓名","Email","所請之門","門名","法門","第幾次","掌相八觀","來源頁","狀態","原始量測"];
+/* 「原始量測」：八觀的原始量測數字（不含照片），供日後校正。新欄只加在最後面，既有欄位不動。 */
 
 /* ============ 入口 ============ */
 
@@ -37,6 +38,7 @@ function doPost(e) {
     const p = JSON.parse((e && e.postData && e.postData.contents) || "{}");
 
     if (p.action === "list") return json_(listForAdmin_(p.pw));
+    if (p.action === "next") return json_(rotateNext_(String(p.key || "")));
 
     const req = validate_(p);
 
@@ -96,7 +98,9 @@ function validate_(p) {
 
   const times = Math.max(1, Math.min(999, Number(p.times) || 1));
   const page  = String(p.page || "").slice(0, 200);
-  return { name: name, email: email, n: n, trio: trio, feats: feats, times: times, page: page };
+  /* 原始量測只收「英數＝數字」這類字元，不可能夾帶其他內容 */
+  const raw   = String(p.raw || "").replace(/[^A-Za-z0-9=.\- ]/g, "").replace(/^[=+\-@]+/, "").slice(0, 300);
+  return { name: name, email: email, n: n, trio: trio, feats: feats, times: times, page: page, raw: raw };
 }
 
 /* ============ 寄信配額 ============ */
@@ -145,7 +149,19 @@ function sheet_() {
     sh.appendRow(HEAD);
     sh.setFrozenRows(1);
   }
+  ensureHead_(sh);
   return sh;
+}
+
+/* 舊表只有前 10 欄：補上最後面新增的欄名（只寫空白的表頭格，既有欄位一律不動） */
+function ensureHead_(sh) {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty("headN") === String(HEAD.length)) return;
+  for (var c = 1; c <= HEAD.length; c++) {
+    const cell = sh.getRange(1, c);
+    if (String(cell.getValue()) === "") cell.setValue(HEAD[c - 1]);
+  }
+  props.setProperty("headN", String(HEAD.length));
 }
 
 function log_(req, status) {
@@ -156,7 +172,7 @@ function log_(req, status) {
     }).join(" ");
     sheet_().appendRow([
       Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy-MM-dd HH:mm:ss"),
-      req.name, req.email, req.n, y.name, y.gate, req.times, palm, req.page, status
+      req.name, req.email, req.n, y.name, y.gate, req.times, palm, req.page, status, req.raw || ""
     ]);
   } catch (e) { /* 記錄失敗不影響寄信 */ }
 }
@@ -234,8 +250,8 @@ function buildMail_(req) {
   const repeat = req.times > 1
     ? '<p style="margin:0 0 16px;padding:10px 14px;border:1px solid rgba(63,107,74,.4);'
       + 'background:rgba(63,107,74,.07);border-radius:3px;color:#3f6b4a;line-height:1.85">'
-      + '此為第 <b>' + req.times + '</b> 次觀照，仍得此門——'
-      + '同門再現，非是巧合，正可添幾分信心，依之用功。</p>'
+      + '此為第 <b>' + req.times + '</b> 次觀照。所請之門一經請出，即是君這一段日子用功的所依，故仍是此門——'
+      + '不必別求新門，依之用功即是。</p>'
     : '';
 
   const h2 = function (t) {
@@ -373,4 +389,32 @@ function buildMail_(req) {
     html: html,
     text: text
   };
+}
+
+/* ===== 全場輪替號碼（action: "next"）=====
+ * 號碼順序事先隨機洗好、存在指令碼屬性，所有手機共用；輪完一輪才重洗，換輪時新一輪第一個不等於上一輪最後一個。
+ * LockService 保證同時多人領號也不會領到同一個。只發號碼，不存任何個人資料。
+ * ROTATE_KEYS 的 n 由後台決定，不信任前端傳來的數字。 */
+var ROTATE_KEYS = { door25: 25 };
+function rotateNext_(key){
+  var n = ROTATE_KEYS[key];
+  if(!n) return { ok:false, msg:"bad key" };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(8000);
+  try{
+    var props = PropertiesService.getScriptProperties();
+    var seq = JSON.parse(props.getProperty("rot_seq_" + key) || "[]");
+    var pos = Number(props.getProperty("rot_pos_" + key) || 0);
+    if(seq.length !== n || pos >= n){
+      var last = seq.length ? seq[seq.length - 1] : -1;
+      seq = []; for(var i = 0; i < n; i++) seq.push(i);
+      for(var j = n - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var t = seq[j]; seq[j] = seq[k]; seq[k] = t; }
+      if(n > 1 && seq[0] === last){ var t2 = seq[0]; seq[0] = seq[1]; seq[1] = t2; }
+      pos = 0;
+    }
+    var idx = seq[pos];
+    var upd = {}; upd["rot_seq_" + key] = JSON.stringify(seq); upd["rot_pos_" + key] = String(pos + 1);
+    props.setProperties(upd);
+    return { ok:true, idx: idx };
+  } finally { lock.releaseLock(); }
 }
