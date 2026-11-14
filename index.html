@@ -417,8 +417,8 @@
     <div class="ng-t">楞嚴修法 ・ 反聞聞自性</div>
     <div class="ng-x">所請之門是入手處，<b>反聞聞自性是諸門之後的同一條路</b>。
       第三關備三分鐘引導的聞性練習，當下就做一次——站著、坐著都可以，人聲嘈雜處正好。</div>
-    <a class="ng-b" href="https://twnyda07.github.io/baoyan-53can/xiufa.html" target="_blank" rel="noopener">進第三關 →</a>
-    <a class="ng-h" href="https://twnyda07.github.io/baoyan-53can/fahui.html" target="_blank" rel="noopener">／　回三關入口 · 面相 → 掌紋 → 修法</a>
+    <a class="ng-b" href="https://twnyda07.github.io/baoyan-53can/xiufa.html">進第三關 →</a>
+    <a class="ng-h" href="https://twnyda07.github.io/baoyan-53can/fahui.html">／　回三關入口 · 面相 → 掌紋 → 修法</a>
   </div>
 
   <div class="mailbox" id="mailBox"></div>
@@ -464,6 +464,7 @@
 
 <script src="yuantong-data.js"></script>
 <script src="camera.js"></script>
+<script src="nav.js"></script>
 <script src="mail.js"></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -764,6 +765,7 @@ function show(f){
 
   $("stage").style.display = "none";
   $("result").classList.add("show");
+  BYNav.setResult(true);
   $("result").scrollIntoView({behavior:"smooth", block:"start"});
 }
 
@@ -788,14 +790,25 @@ function talkHTML(y){
       <span class="by">見輝法師《秒懂楞嚴》第 ${y.talk.ep} 集　·　YouTube</span></span></a>`;
 }
 
-$("againBtn").addEventListener("click", ()=>{
+function backToScan(){
   $("result").classList.remove("show");
   $("stage").style.display = "block";
   stopCam();
   viewer.className = "viewer";
   $("readBtn").disabled = true;
   $("tip").textContent = "按「開啟鏡頭」開始"; $("err").textContent = "";
+  BYNav.setResult(false);
   window.scrollTo({top:0, behavior:"smooth"});
+}
+$("againBtn").addEventListener("click", backToScan);
+/* 頂端導覽：回上頁＝結果→回到拍掌；下一位＝清掉上一位的紀錄再回到拍掌（避免下一位被當成同一人、拿到同一門） */
+BYNav.mount({
+  crumb: "第二關．掌紋",
+  parentUrl: "https://twnyda07.github.io/baoyan-53can/fahui.html",
+  theme: "light",
+  nextLabel: "↺ 下一位",
+  onBack: ()=>{ if($("result").classList.contains("show")){ backToScan(); return true; } return false; },
+  onNext: ()=>{ try{ localStorage.removeItem(LS); }catch(_){} backToScan(); }
 });
 $("printBtn").addEventListener("click", ()=> window.print());
 
