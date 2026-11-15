@@ -551,7 +551,7 @@
 <script src="nav.js?v=20261114c"></script>
 <script src="mail.js?v=20261114c"></script>
 <script src="palm.js?v=20261114c"></script>
-<script src="rotate.js?v=20261114c"></script>
+<script src="rotate.js?v=20261115a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -595,6 +595,7 @@ function fairPick(key, n){
   try{ localStorage.setItem(key, JSON.stringify({bag, last:pick})); }catch(_){}
   return pick;
 }
+if(typeof MAIL_API === "string" && MAIL_API && window.BYRotate) BYRotate.warm(MAIL_API, "door25");   // 一打開就先向後台領號，拍完不必等
 /* 三門不重複：第一門為所請之門（平均請出），其餘二門為旁通（純亂數） */
 async function drawDoors(){
   const local = ()=>fairPick("baoyan25_doorbag", YUANTONG.length);
