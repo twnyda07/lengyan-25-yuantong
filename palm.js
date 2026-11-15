@@ -12,7 +12,7 @@
 
   /* 各觀的中點與倍率：分數＝50＋(原始量−中點)×倍率 */
   const CAL = {
-    form:    {c: 0.72,   k: 250},
+    form:    {c: 1.0,    k: 70},     // 11-15 依當天實測中指長÷掌寬（0.72～1.52，中位約 1.0）重設；原 0.72×250 有 7 人頂到最高
     head:    {c: 1.1402, k: 82},
     heart:   {c: 1.3232, k: 82},
     life:    {c: 0.8526, k: 78},
@@ -21,6 +21,25 @@
     density: {c: 0.44,   k: 125},
     finger:  {c: 0.25,   k: 200, rc: 1.45, rk: 30}
   };
+
+  /* 五級平均（11-15 寺方裁示）：依當天 19 筆實測分布，把各觀的 20／40／60／80 百分位對到 20／40／60／80，
+     讓五段說明出現的人數大致平均（原本智慧線 19 人有 15 人讀到同一段）。只改分數落點，不改任何說明文字。
+     每週一自動檢查（palm-weekly）會看分布是否仍平均。 */
+  const SPREAD = {
+    form:    [0, 42.6, 48.4, 51.6, 65.2, 100],
+    head:    [0, 45,   50,   51,   54,   100],
+    heart:   [0, 21,   35.2, 42,   45.8, 100],
+    life:    [0, 35.4, 49.2, 53.4, 63.4, 100],
+    fate:    [0, 39.8, 45.2, 48.8, 55.4, 100],
+    mount:   [0, 25.8, 44.4, 48.8, 60,   100],
+    density: [0, 42.2, 47,   54.6, 61.6, 100],
+    finger:  [0, 28.2, 45.4, 53.8, 61.8, 100]
+  };
+  function spread(k, v){
+    const x = SPREAD[k]; if(!x || !isFinite(v)) return v;
+    for(let i = 1; i < x.length; i++) if(v <= x[i]) return (i - 1) * 20 + (v - x[i-1]) / (x[i] - x[i-1]) * 20;
+    return 100;
+  }
 
   function isSkin(r, g, b, lum){
     return r > 55 && r >= g && g >= b - 12 && (r - b) > 8 && lum > 42 && lum < 245;
@@ -224,6 +243,7 @@
       density: N(soft(lin("density", raw.density))),
       finger:  N(soft(fingerScore))
     };
+    for(const k in SPREAD) out[k] = N(spread(k, out[k]));
     out.raw = raw;
     return out;
   }
